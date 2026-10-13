@@ -1,8 +1,9 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import pg from "pg";
+import { resolveDatabaseUrl } from "../src/server/config";
 
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = resolveDatabaseUrl();
 if (!databaseUrl) {
   console.error("DATABASE_URL is required.");
   process.exit(1);

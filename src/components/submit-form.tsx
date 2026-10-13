@@ -21,12 +21,13 @@ export function SubmitForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier: value }),
       });
-      const body = (await response.json()) as { error?: string; userId?: string; message?: string };
+      const body = (await response.json()) as { error?: string; userId?: string; profileKey?: string; message?: string };
       if (!response.ok || !body.userId) {
         setError(body.error ?? "The profile could not be submitted.");
         return;
       }
-      router.push(`/p/${body.userId}?notice=${encodeURIComponent(body.message ?? "Profile saved.")}`);
+      const key = body.profileKey || body.userId;
+      router.push(`/p/${encodeURIComponent(key)}?notice=${encodeURIComponent(body.message ?? "Profile saved.")}`);
     } catch {
       setError("The request failed before a profile could be saved.");
     } finally {

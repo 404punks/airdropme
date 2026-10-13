@@ -1,7 +1,11 @@
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import nacl from "tweetnacl";
 import bs58 from "bs58";
 import { beforeEach, describe, expect, it } from "vitest";
+import { readConfig, resolveDatabaseUrl } from "@/server/config";
+import { FileMemoryStore } from "@/server/db/file-store";
 import { MemoryStore } from "@/server/db/memory-store";
 import { aggregateCallouts } from "@/server/pumpfun/aggregate";
 import { pumpGet } from "@/server/pumpfun/http";
@@ -12,7 +16,8 @@ import { assertSameOrigin } from "@/server/security/origin";
 import { rateLimit, resetRateLimits } from "@/server/security/rate-limit";
 import { buildClaimMessage, verifyWalletSignature } from "@/server/security/signature";
 import { registerClaim, type Distributor } from "@/server/services/claims";
-import { submitProfile } from "@/server/services/profiles";
+import { demoProvider } from "@/server/pumpfun/demo-provider";
+import { ServiceError, submitProfile, viewProfile } from "@/server/services/profiles";
 import { isSolanaAddress, parseIdentifier } from "@/server/validation/identifier";
 
 const wallet = "11111111111111111111111111111111";
@@ -496,6 +501,50 @@ describe("security helpers", () => {
     ]) {
       expect(sql).toContain(table);
     }
+  });
+});
+
+describe("missing database", () => {
+  beforeEach(() => resetRateLimits());
+
+  it("loads a public profile that is not already stored", async () => {
+    const repo = new MemoryStore();
+    const view = await viewProfile(repo, "demoalpha", { provider: demoProvider, ip: "203.0.113.20" });
+    expect(view.user.username).toBe("DEMO_alpha");
+    expect(view.user.currentPoints).toBe(182);
+    expect(view.snapshot?.followers).toBe(120);
+    const again = await viewProfile(new MemoryStore(), "demoalpha", { provider: demoProvider, ip: "203.0.113.21" });
+    expect(again.user.username).toBe("DEMO_alpha");
+  });
+
+  it("still rejects an unknown internal id", async () => {
+    await expect(viewProfile(new MemoryStore(), "11111111-1111-4111-8111-111111111111", { provider: demoProvider })).rejects.toBeInstanceOf(
+      ServiceError,
+    );
+  });
+
+  it("reloads profiles from the file store after a new process", async () => {
+    const filePath = join(mkdtempSync(join(tmpdir(), "airdropme-")), "store.json");
+    const first = new FileMemoryStore(filePath);
+    await viewProfile(first, "demoalpha", { provider: demoProvider, ip: "203.0.113.22" });
+    const second = new FileMemoryStore(filePath);
+    const stored = await second.findUserByUsername("DEMO_alpha");
+    expect(stored?.currentPoints).toBe(182);
+    const board = await second.leaderboard("", 1, 10);
+    expect(board.total).toBe(1);
+  });
+
+  it("reads Postgres URLs from the host variable names", () => {
+    expect(resolveDatabaseUrl({ POSTGRES_URL: "postgres://db.example/app" })).toBe("postgres://db.example/app");
+    expect(resolveDatabaseUrl({ DATABASE_URL: "postgres://primary", POSTGRES_URL: "postgres://other" })).toBe("postgres://primary");
+    expect(resolveDatabaseUrl({})).toBe("");
+    const config = readConfig({
+      PGHOST: "db.internal",
+      PGUSER: "airdrop",
+      PGPASSWORD: "p@ss",
+      PGDATABASE: "airdropme",
+    });
+    expect(config.DATABASE_URL).toBe("postgresql://airdrop:p%40ss@db.internal:5432/airdropme");
   });
 });
 

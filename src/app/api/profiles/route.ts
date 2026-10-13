@@ -3,7 +3,7 @@ import { getStore } from "@/server/db";
 import { errorResponse, readJson } from "@/server/http";
 import { clientIp } from "@/server/security/ip";
 import { getProvider } from "@/server/pumpfun";
-import { submitProfile } from "@/server/services/profiles";
+import { publicProfileKey, submitProfile } from "@/server/services/profiles";
 
 export async function POST(request: Request) {
   try {
@@ -17,6 +17,7 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({
       userId: view.user.id,
+      profileKey: publicProfileKey(view.user),
       created: view.created ?? false,
       message: view.message,
       points: view.user.currentPoints,

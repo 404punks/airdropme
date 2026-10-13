@@ -219,7 +219,7 @@ export function AdminDashboard({ data }: { data: AdminData }) {
               {data.users.map((user) => (
                 <tr key={user.id} className="border-t border-line">
                   <td className="py-3">
-                    <a className="text-acid" href={`/p/${user.id}`}>
+                    <a className="text-acid" href={`/p/${encodeURIComponent(user.username ?? user.canonicalWallet ?? user.pumpUserId)}`}>
                       {user.username ?? user.pumpUserId}
                     </a>
                     <p className="text-xs text-mute">{user.flagged ? `Flagged: ${user.flagReason ?? "yes"}` : user.canonicalWallet}</p>

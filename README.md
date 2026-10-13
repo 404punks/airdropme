@@ -28,7 +28,7 @@ Points are recomputed from current cumulative totals. A refresh replaces the sco
 
 Next.js App Router, TypeScript, Tailwind CSS, shadcn-style UI primitives, Postgres via Supabase when `DATABASE_URL` is set, and Solana Wallet Adapter (Phantom and Solflare) for the claim signature.
 
-Without `DATABASE_URL`, the process keeps an ephemeral memory store and shows a banner. That is for local development only.
+Without `DATABASE_URL` (or `POSTGRES_URL`), profile pages still load public Pump.fun statistics. The leaderboard is written to `data/airdropme-store.json` on a single server. Serverless hosts do not share that file, so set Postgres when rankings must survive across instances. A banner explains that mode.
 
 ## Local development
 
@@ -59,7 +59,7 @@ The migration creates users, submitted profiles, statistic snapshots, Callout re
 The app is Vercel-compatible.
 
 1. Create a Supabase Postgres database and run the migration.
-2. Set the environment variables from `.env.example` in the host. `DATABASE_URL` is required in production. Keep `PUMPFUN_API_TOKEN` empty unless you have an operator credential, and never prefix secrets with `NEXT_PUBLIC_`.
+2. Set the environment variables from `.env.example` in the host. Set `DATABASE_URL` or `POSTGRES_URL` so the leaderboard is shared in production. Keep `PUMPFUN_API_TOKEN` empty unless you have an operator credential, and never prefix secrets with `NEXT_PUBLIC_`.
 3. Leave `DISTRIBUTION_ENABLED=false`. Turning it on does not send tokens; the claim is stored as failed because no verified program is configured.
 4. Deploy with `npm run build`.
 

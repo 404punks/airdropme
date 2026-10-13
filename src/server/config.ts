@@ -24,6 +24,31 @@ export type AppConfig = z.infer<typeof schema> & {
   adminEnabled: boolean;
 };
 
+const DATABASE_ENV_KEYS = [
+  "DATABASE_URL",
+  "POSTGRES_URL",
+  "POSTGRES_PRISMA_URL",
+  "POSTGRES_URL_NON_POOLING",
+  "SUPABASE_DATABASE_URL",
+] as const;
+
+export function resolveDatabaseUrl(env: NodeJS.ProcessEnv = process.env): string {
+  for (const key of DATABASE_ENV_KEYS) {
+    const value = env[key]?.trim();
+    if (value) return value;
+  }
+  const host = env.PGHOST?.trim();
+  const user = env.PGUSER?.trim();
+  const database = env.PGDATABASE?.trim();
+  if (!host || !user || !database) return "";
+  const password = env.PGPASSWORD ?? "";
+  const port = env.PGPORT?.trim() || "5432";
+  const userInfo = password
+    ? `${encodeURIComponent(user)}:${encodeURIComponent(password)}`
+    : encodeURIComponent(user);
+  return `postgresql://${userInfo}@${host}:${port}/${encodeURIComponent(database)}`;
+}
+
 export function readConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const parsed = schema.parse(env);
   const adminEnabled = Boolean(
@@ -31,6 +56,7 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   );
   return {
     ...parsed,
+    DATABASE_URL: resolveDatabaseUrl(env),
     distributionEnabled: parsed.DISTRIBUTION_ENABLED === "true",
     adminEnabled,
   };

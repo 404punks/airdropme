@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
-export function RefreshButton({ userId }: { userId: string }) {
+export function RefreshButton({ profileKey }: { profileKey: string }) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
@@ -13,13 +13,14 @@ export function RefreshButton({ userId }: { userId: string }) {
     setPending(true);
     setError("");
     try {
-      const response = await fetch(`/api/profiles/${userId}/refresh`, { method: "POST" });
-      const body = (await response.json()) as { error?: string; message?: string };
+      const response = await fetch(`/api/profiles/${encodeURIComponent(profileKey)}/refresh`, { method: "POST" });
+      const body = (await response.json()) as { error?: string; message?: string; profileKey?: string };
       if (!response.ok) {
         setError(body.error ?? "Refresh failed.");
         return;
       }
-      router.replace(`/p/${userId}?notice=${encodeURIComponent(body.message ?? "Snapshot refreshed.")}`);
+      const nextKey = body.profileKey || profileKey;
+      router.replace(`/p/${encodeURIComponent(nextKey)}?notice=${encodeURIComponent(body.message ?? "Snapshot refreshed.")}`);
       router.refresh();
     } catch {
       setError("Refresh failed before Pump.fun responded.");

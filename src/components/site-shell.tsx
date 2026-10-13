@@ -34,8 +34,8 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       ) : null}
       {store.kind === "memory" ? (
         <p className="mb-4 rounded-2xl border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-warn">
-          This process is using ephemeral memory because DATABASE_URL is not set. Data disappears when the server
-          stops. Production needs Postgres.
+          DATABASE_URL is not set, so this server does not keep a shared leaderboard. Profile pages still load public
+          Pump.fun statistics directly.
         </p>
       ) : null}
       <main className="flex-1">{children}</main>
