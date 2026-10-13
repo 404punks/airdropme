@@ -1,0 +1,202 @@
+import { config } from "@/server/config";
+import type { Repository, SnapshotRecord, UserRecord } from "@/server/db/types";
+import { calculatePoints, type PointsBreakdown, type ScoringSettings } from "@/server/points/calculate";
+import { NotPumpProfileError, ProfileNotFoundError, type FetchOutcome, type StatsProvider } from "@/server/pumpfun/types";
+import { hashIp } from "@/server/security/ip";
+import { rateLimit } from "@/server/security/rate-limit";
+import { parseIdentifier } from "@/server/validation/identifier";
+
+export class ServiceError extends Error {
+  constructor(
+    message: string,
+    readonly code: "validation" | "rate_limit" | "not_found" | "not_profile" | "throttled" | "upstream",
+    readonly status: number,
+    readonly extra?: Record<string, unknown>,
+  ) {
+    super(message);
+    this.name = "ServiceError";
+  }
+}
+
+export interface ProfileView {
+  user: UserRecord;
+  snapshot: SnapshotRecord | null;
+  rank: number | null;
+  callouts: Awaited<ReturnType<Repository["listCallouts"]>>;
+  freshness: "recent" | "cached" | "stale" | "demo" | "empty";
+  created?: boolean;
+  message?: string;
+}
+
+function freshness(snapshot: SnapshotRecord | null, ttlSeconds: number): ProfileView["freshness"] {
+  if (!snapshot) return "empty";
+  if (snapshot.dataMode === "demo") return "demo";
+  const age = Date.now() - new Date(snapshot.fetchedAt).getTime();
+  if (age <= 20_000) return "recent";
+  if (age <= ttlSeconds * 1000) return "cached";
+  return "stale";
+}
+
+async function rankFor(repo: Repository, userId: string): Promise<number | null> {
+  const board = await repo.leaderboard("", 1, 5000);
+  return board.rows.find((row) => row.userId === userId)?.rank ?? null;
+}
+
+export async function viewProfile(repo: Repository, id: string): Promise<ProfileView> {
+  const user =
+    (await repo.findUserById(id)) ??
+    (await repo.findUserByPumpId(id)) ??
+    (await repo.findUserByUsername(id)) ??
+    (await repo.findUserByWallet(id));
+  if (!user) throw new ServiceError("That profile is not in this campaign yet.", "not_found", 404);
+  const snapshot = await repo.latestSnapshot(user.id);
+  const callouts = snapshot ? await repo.listCallouts(snapshot.id) : [];
+  return {
+    user,
+    snapshot,
+    rank: await rankFor(repo, user.id),
+    callouts,
+    freshness: freshness(snapshot, config.STATS_CACHE_TTL_SECONDS),
+  };
+}
+
+function zeroIfBanned(outcome: FetchOutcome, breakdown: PointsBreakdown): PointsBreakdown {
+  if (!outcome.profile.banned) return breakdown;
+  return {
+    ...breakdown,
+    components: breakdown.components.map((item) => ({
+      ...item,
+      included: false,
+      points: 0,
+      counted: 0,
+      reason: "Pump.fun reports this profile as banned, so it is not scored.",
+    })),
+    subtotal: 0,
+    total: 0,
+    capped: false,
+  };
+}
+
+export async function submitProfile(options: {
+  repo: Repository;
+  provider: StatsProvider;
+  raw: string;
+  ip: string;
+  force?: boolean;
+}): Promise<ProfileView> {
+  const parsed = parseIdentifier(options.raw);
+  if (!parsed.ok) throw new ServiceError(parsed.error, "validation", 400);
+  const ipHash = hashIp(options.ip, config.IP_HASH_SALT);
+  const limited = rateLimit(`submit:${ipHash}`, config.SUBMISSIONS_PER_WINDOW, config.RATE_LIMIT_WINDOW_SECONDS * 1000);
+  if (!limited.ok) {
+    throw new ServiceError("Too many profile submissions from this network. Try again later.", "rate_limit", 429, {
+      retryAfterSeconds: limited.retryAfterSeconds,
+    });
+  }
+  const since = new Date(Date.now() - config.RATE_LIMIT_WINDOW_SECONDS * 1000).toISOString();
+  const prior = await options.repo.submissionCount(ipHash, since);
+  if (prior >= config.SUBMISSIONS_PER_WINDOW) {
+    throw new ServiceError("Too many profile submissions from this network. Try again later.", "rate_limit", 429);
+  }
+
+  const existing =
+    parsed.kind === "wallet"
+      ? await options.repo.findUserByWallet(parsed.lookup)
+      : await options.repo.findUserByUsername(parsed.lookup);
+  if (existing?.lastFetchedAt && !options.force) {
+    const age = Date.now() - new Date(existing.lastFetchedAt).getTime();
+    if (age < config.MIN_REFRESH_SECONDS * 1000) {
+      const view = await viewProfile(options.repo, existing.id);
+      return {
+        ...view,
+        created: false,
+        message: "This profile is already registered. Showing the latest stored snapshot.",
+      };
+    }
+  }
+
+  let outcome: FetchOutcome;
+  try {
+    outcome = await options.provider.fetchProfile(parsed.lookup);
+  } catch (error) {
+    if (error instanceof ProfileNotFoundError) throw new ServiceError(error.message, "not_found", 404);
+    if (error instanceof NotPumpProfileError) throw new ServiceError(error.message, "not_profile", 422);
+    throw new ServiceError(
+      error instanceof Error ? error.message : "Pump.fun could not be reached. No score was estimated.",
+      "upstream",
+      502,
+    );
+  }
+
+  const settings = await options.repo.getSettings();
+  const breakdown = zeroIfBanned(outcome, calculatePoints(outcome.metrics, settings));
+  const saved = await options.repo.saveVerifiedStats({
+    submittedRaw: options.raw.trim().slice(0, 200),
+    normalized: parsed.lookup,
+    ipHash,
+    user: {
+      pumpUserId: outcome.profile.pumpUserId,
+      username: outcome.profile.username,
+      canonicalWallet: outcome.profile.canonicalWallet,
+      profileImage: outcome.profile.profileImage,
+      bio: outcome.profile.bio,
+      banned: outcome.profile.banned,
+      dataMode: outcome.dataMode,
+      flagged: outcome.profile.banned,
+      flagReason: outcome.profile.banned ? "Pump.fun reports this profile as banned." : null,
+    },
+    snapshot: {
+      dataMode: outcome.dataMode,
+      followers: outcome.metrics.followers.value,
+      followersStatus: outcome.metrics.followers.status,
+      followersSource: outcome.metrics.followers.source,
+      followersDetail: outcome.metrics.followers.detail,
+      callouts: outcome.metrics.callouts.value,
+      calloutsStatus: outcome.metrics.callouts.status,
+      calloutsSource: outcome.metrics.callouts.source,
+      calloutsDetail: outcome.metrics.callouts.detail,
+      likes: outcome.metrics.likes.value,
+      likesStatus: outcome.metrics.likes.status,
+      likesSource: outcome.metrics.likes.source,
+      likesDetail: outcome.metrics.likes.detail,
+      reposts: outcome.metrics.reposts.value,
+      repostsStatus: outcome.metrics.reposts.status,
+      repostsSource: outcome.metrics.reposts.source,
+      repostsDetail: outcome.metrics.reposts.detail,
+      upstreamComputedAt: outcome.upstreamComputedAt,
+      pointsTotal: breakdown.total,
+      pointsBreakdown: breakdown,
+      formulaVersion: breakdown.formulaVersion,
+    },
+    callouts: outcome.callouts,
+    breakdown,
+    settings,
+  });
+  if (outcome.failures.length) {
+    await options.repo.insertFailures(
+      outcome.failures.map((failure) => ({
+        userId: saved.user.id,
+        identifier: parsed.lookup,
+        endpoint: failure.endpoint,
+        statusCode: failure.statusCode,
+        message: failure.message.slice(0, 300),
+      })),
+    );
+  }
+  const view = await viewProfile(options.repo, saved.user.id);
+  return {
+    ...view,
+    created: saved.created,
+    message: saved.created ? "Profile registered from public Pump.fun data." : "Stored snapshot refreshed.",
+  };
+}
+
+export async function publicLeaderboard(repo: Repository, query: string, page: number) {
+  const pageSize = 20;
+  const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
+  const result = await repo.leaderboard(query.slice(0, 80), safePage, pageSize);
+  const settings = await repo.getSettings();
+  return { ...result, page: safePage, pageSize, settings };
+}
+
+export type { ScoringSettings };
