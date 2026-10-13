@@ -229,12 +229,4 @@ export async function submitProfile(options: {
   };
 }
 
-export async function publicLeaderboard(repo: Repository, query: string, page: number) {
-  const pageSize = 20;
-  const safePage = Number.isFinite(page) && page > 0 ? Math.floor(page) : 1;
-  const result = await repo.leaderboard(query.slice(0, 80), safePage, pageSize);
-  const settings = await repo.getSettings();
-  return { ...result, page: safePage, pageSize, settings };
-}
-
 export type { ScoringSettings };

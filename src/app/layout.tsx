@@ -7,8 +7,8 @@ const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 const syne = Syne({ subsets: ["latin"], variable: "--font-syne" });
 
 export const metadata: Metadata = {
-  title: "AirdropMe · Pump.fun community stats",
-  description: "Track public Pump.fun statistics, campaign points, and airdrop claim registration.",
+  title: "Ansemmas PTS",
+  description: "Check Pump.fun points and airdrop eligibility with a public username or wallet address.",
 };
 
 export const dynamic = "force-dynamic";

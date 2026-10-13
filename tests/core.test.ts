@@ -18,6 +18,7 @@ import { buildClaimMessage, verifyWalletSignature } from "@/server/security/sign
 import { registerClaim, type Distributor } from "@/server/services/claims";
 import { demoProvider } from "@/server/pumpfun/demo-provider";
 import { ServiceError, submitProfile, viewProfile } from "@/server/services/profiles";
+import { qualification } from "@/lib/eligibility";
 import { isSolanaAddress, parseIdentifier } from "@/server/validation/identifier";
 
 const wallet = "11111111111111111111111111111111";
@@ -501,6 +502,51 @@ describe("security helpers", () => {
     ]) {
       expect(sql).toContain(table);
     }
+  });
+});
+
+describe("eligibility", () => {
+  it("uses the claim rules and does not mark a closed campaign as eligible", () => {
+    expect(
+      qualification({
+        hasSnapshot: true,
+        points: 10,
+        minPoints: 1,
+        banned: false,
+        flagged: false,
+        claimStatus: "upcoming",
+      }).status,
+    ).toBe("claim_coming_soon");
+    expect(
+      qualification({
+        hasSnapshot: true,
+        points: 0,
+        minPoints: 1,
+        banned: false,
+        flagged: false,
+        claimStatus: "claim_open",
+      }).status,
+    ).toBe("not_eligible");
+    expect(
+      qualification({
+        hasSnapshot: false,
+        points: 10,
+        minPoints: 1,
+        banned: false,
+        flagged: false,
+        claimStatus: "claim_open",
+      }).status,
+    ).toBe("unavailable");
+    expect(
+      qualification({
+        hasSnapshot: true,
+        points: 10,
+        minPoints: 1,
+        banned: false,
+        flagged: false,
+        claimStatus: "claim_open",
+      }).status,
+    ).toBe("eligible");
   });
 });
 

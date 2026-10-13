@@ -27,7 +27,7 @@ export default function DataSourcesPage() {
               ["Likes and reposts", "GET /callout/list/{userId}", "Public, paginated", "Calculated sum, deduped by calloutId"],
               ["Retweets", "No field", "Unavailable", "Shown as Unavailable"],
               ["Social engagement rollup", "GET /users/{address}/social-stats", "401 without a token", "Not used"],
-              ["Callout leaderboard", "GET /callout/leaderboard", "401 without a token", "Not used"],
+              ["Global callout ranking API", "GET /callout/leaderboard", "401 without a token", "Not used"],
               ["Follower list", "GET /following/followers/{id}", "403 Client not allowed", "Not used"],
             ].map((row) => (
               <tr key={row[0]} className="border-t border-line">

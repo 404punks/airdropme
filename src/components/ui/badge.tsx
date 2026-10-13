@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 const tones = {
-  live: "bg-acid/15 text-acid",
+  live: "bg-blue/15 text-blue",
   cached: "bg-warn/15 text-warn",
   unavailable: "bg-danger/15 text-danger",
   demo: "bg-violet/20 text-violet",
@@ -19,7 +19,7 @@ export function Badge({
   className?: string;
 }) {
   return (
-    <span className={cn("inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide", tones[tone], className)}>
+    <span className={cn("inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium", tones[tone], className)}>
       {children}
     </span>
   );

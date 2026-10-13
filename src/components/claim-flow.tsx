@@ -7,11 +7,19 @@ import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom";
 import { SolflareWalletAdapter } from "@solana/wallet-adapter-solflare";
 import bs58 from "bs58";
 import "@solana/wallet-adapter-react-ui/styles.css";
+import { CopyAddress } from "@/components/copy-address";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { shortKey } from "@/lib/utils";
 
-function ClaimInner({ rpcUrl }: { rpcUrl: string }) {
-  const { publicKey, signMessage, connected } = useWallet();
+function networkLabel(rpcUrl: string): string {
+  if (rpcUrl.includes("devnet")) return "Solana Devnet";
+  if (rpcUrl.includes("testnet")) return "Solana Testnet";
+  return "Solana Mainnet";
+}
+
+function ClaimInner({ rpcUrl, distributionEnabled }: { rpcUrl: string; distributionEnabled: boolean }) {
+  const { publicKey, signMessage, connected, disconnect, wallet } = useWallet();
   const [profileId, setProfileId] = useState("");
   const [message, setMessage] = useState("");
   const [result, setResult] = useState("");
@@ -19,9 +27,11 @@ function ClaimInner({ rpcUrl }: { rpcUrl: string }) {
   const [tx, setTx] = useState<string | null>(null);
   const [status, setStatus] = useState("");
   const [pending, setPending] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const network = networkLabel(rpcUrl);
 
   async function start() {
-    if (!publicKey) return;
+    if (!publicKey || pending) return;
     setPending(true);
     setError("");
     setResult("");
@@ -33,7 +43,7 @@ function ClaimInner({ rpcUrl }: { rpcUrl: string }) {
       });
       const body = (await response.json()) as { error?: string; message?: string; nonce?: string };
       if (!response.ok || !body.message || !body.nonce) {
-        setError(body.error ?? "A claim nonce could not be issued.");
+        setError(body.error ?? "A claim could not be started.");
         return;
       }
       if (!signMessage) {
@@ -60,15 +70,22 @@ function ClaimInner({ rpcUrl }: { rpcUrl: string }) {
         message?: string;
       };
       if (!claim.ok) {
-        setError(claimBody.error ?? "Claim registration failed.");
+        setError(claimBody.error ?? "The claim was not completed.");
         return;
       }
       setMessage(body.message);
       setStatus(claimBody.status ?? "registered");
       setTx(claimBody.txSignature ?? null);
-      setResult(claimBody.message ?? "Claim registration recorded.");
+      if (claimBody.txSignature) {
+        setResult("Your transaction was submitted. Waiting for network confirmation.");
+      } else if (claimBody.status === "failed") {
+        setResult(claimBody.failureReason ?? "Your transaction was not completed. Check your wallet and try again if needed.");
+      } else {
+        setResult(claimBody.message ?? "Claim registration recorded. No token transfer was sent.");
+      }
+      setConfirming(false);
     } catch {
-      setError("The wallet signature was cancelled or the request failed.");
+      setError("Connection was cancelled. You can try again whenever you're ready.");
     } finally {
       setPending(false);
     }
@@ -76,29 +93,68 @@ function ClaimInner({ rpcUrl }: { rpcUrl: string }) {
 
   return (
     <div className="space-y-5">
-      <p className="text-sm text-mute">Endpoint used by the adapter: {rpcUrl}. No transaction is sent by this page.</p>
-      <WalletMultiButton />
+      <p className="text-sm text-mute">Connect your Solana wallet to continue. Expected network: {network}.</p>
+      {wallet && connected ? null : <WalletMultiButton />}
+      {connected && publicKey ? (
+        <div className="rounded-2xl border border-line bg-ink/60 p-4 text-sm">
+          <p className="text-acid">Wallet connected successfully.</p>
+          <p className="mt-2">
+            <CopyAddress address={publicKey.toBase58()} />
+          </p>
+          <p className="mt-1 text-mute">Connected with {wallet?.adapter.name ?? "a Solana wallet"} on {network}.</p>
+          <button type="button" className="mt-3 text-sm text-blue" onClick={() => disconnect()}>
+            Disconnect Wallet
+          </button>
+        </div>
+      ) : (
+        <p className="text-sm text-mute">Phantom and Solflare are supported.</p>
+      )}
+      {!distributionEnabled ? (
+        <p className="rounded-2xl border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-warn">
+          Token distribution is not active. A signature only registers a claim request. It does not send tokens.
+        </p>
+      ) : null}
       <label className="block text-sm font-medium" htmlFor="profileId">
-        Registered profile id
+        Profile id from your PTS page
       </label>
       <Input
         id="profileId"
         value={profileId}
         onChange={(event) => setProfileId(event.target.value)}
-        placeholder="Profile id from your statistics page"
+        placeholder="Profile id"
         spellCheck={false}
+        autoComplete="off"
       />
-      <Button type="button" onClick={start} disabled={!connected || pending || !profileId.trim()}>
-        {pending ? "Waiting for signature…" : "Sign claim registration"}
-      </Button>
-      {error ? <p className="text-sm text-danger">{error}</p> : null}
+      {!confirming ? (
+        <Button type="button" onClick={() => setConfirming(true)} disabled={!connected || !profileId.trim()}>
+          Review Claim
+        </Button>
+      ) : (
+        <div className="space-y-3 rounded-2xl border border-line bg-navy p-4 text-sm">
+          <p>Review the destination wallet {publicKey ? shortKey(publicKey.toBase58()) : ""} before you approve a signature.</p>
+          <p className="text-mute">No claim amount is shown because the backend has not confirmed a token payment.</p>
+          <div className="flex flex-wrap gap-3">
+            <Button type="button" onClick={start} disabled={pending}>
+              {pending ? "Waiting for wallet…" : distributionEnabled ? "Claim Airdrop" : "Register claim"}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => setConfirming(false)} disabled={pending}>
+              Back
+            </Button>
+          </div>
+        </div>
+      )}
+      {error ? (
+        <p role="alert" className="text-sm text-danger">
+          {error}
+        </p>
+      ) : null}
       {result ? (
         <div className="rounded-2xl border border-line bg-ink/50 p-4 text-sm">
-          <p className="font-semibold text-acid">{result}</p>
-          <p className="mt-2 text-mute">Status: {status || "registered"}. This is a claim record, not a token transfer.</p>
+          <p className="font-medium text-mist">{result}</p>
+          <p className="mt-2 text-mute">Status: {status || "registered"}. This record is not a completed token transfer unless a transaction signature is shown.</p>
           {tx ? (
-            <a className="mt-2 inline-block text-violet" href={`https://solscan.io/tx/${tx}`} target="_blank" rel="noreferrer">
-              View {tx} on Solscan
+            <a className="mt-2 inline-block text-blue" href={`https://solscan.io/tx/${tx}`} target="_blank" rel="noreferrer">
+              View Transaction
             </a>
           ) : (
             <p className="mt-2 text-mute">No transaction signature exists because distribution is not configured.</p>
@@ -110,13 +166,13 @@ function ClaimInner({ rpcUrl }: { rpcUrl: string }) {
   );
 }
 
-export function ClaimFlow({ rpcUrl }: { rpcUrl: string }) {
+export function ClaimFlow({ rpcUrl, distributionEnabled }: { rpcUrl: string; distributionEnabled: boolean }) {
   const wallets = useMemo(() => [new PhantomWalletAdapter(), new SolflareWalletAdapter()], []);
   return (
     <ConnectionProvider endpoint={rpcUrl}>
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
-          <ClaimInner rpcUrl={rpcUrl} />
+          <ClaimInner rpcUrl={rpcUrl} distributionEnabled={distributionEnabled} />
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>

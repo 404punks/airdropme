@@ -32,7 +32,7 @@ export function RefreshButton({ profileKey }: { profileKey: string }) {
   return (
     <div className="space-y-2">
       <Button type="button" variant="outline" onClick={refresh} disabled={pending}>
-        {pending ? "Refreshing…" : "Refresh from Pump.fun"}
+        {pending ? "Refreshing…" : "Refresh points"}
       </Button>
       {error ? <p className="text-sm text-danger">{error}</p> : null}
     </div>
