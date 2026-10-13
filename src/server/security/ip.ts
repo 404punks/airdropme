@@ -1,12 +1,16 @@
 import { createHash } from "node:crypto";
 
-export function clientIp(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for");
+export function ipFromHeaders(headerList: Headers): string {
+  const forwarded = headerList.get("x-forwarded-for");
   if (forwarded) {
     const first = forwarded.split(",")[0]?.trim();
     if (first) return first.slice(0, 80);
   }
   return "local";
+}
+
+export function clientIp(request: Request): string {
+  return ipFromHeaders(request.headers);
 }
 
 export function hashIp(ip: string, salt: string): string {

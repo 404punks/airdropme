@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { profilePath } from "@/lib/profile-key";
 import { formatNumber, formatWhen, metricLabel, shortKey } from "@/lib/utils";
 import { explainFormula } from "@/server/points/calculate";
 import { getStore } from "@/server/db";
@@ -35,7 +36,11 @@ export default async function LeaderboardPage({
         </Button>
       </form>
       {data.rows.length === 0 ? (
-        <p className="rounded-3xl border border-dashed border-line p-8 text-mute">No public profiles match this search.</p>
+        <p className="rounded-3xl border border-dashed border-line p-8 text-mute">
+          {getStore().kind === "memory"
+            ? "No profiles are stored on this server yet. Submit a Pump.fun username or wallet and the public statistics will load even without DATABASE_URL."
+            : "No public profiles match this search."}
+        </p>
       ) : (
         <>
           <div className="hidden overflow-x-auto rounded-3xl border border-line md:block">
@@ -54,7 +59,7 @@ export default async function LeaderboardPage({
                   <tr key={row.userId} className="border-t border-line">
                     <td className="px-3 py-3">{row.rank}</td>
                     <td className="px-3 py-3">
-                      <Link className="text-acid" href={`/p/${row.userId}`}>
+                      <Link className="text-acid" href={profilePath(row)}>
                         {row.username ?? shortKey(row.canonicalWallet)}
                       </Link>
                       {row.dataMode === "demo" ? <Badge tone="demo">DEMO</Badge> : null}
@@ -77,7 +82,7 @@ export default async function LeaderboardPage({
                   <p className="text-sm text-mute">#{row.rank}</p>
                   <p className="font-semibold text-acid">{formatNumber(row.points)} pts</p>
                 </div>
-                <Link className="mt-1 block text-lg" href={`/p/${row.userId}`}>
+                <Link className="mt-1 block text-lg" href={profilePath(row)}>
                   {row.username ?? shortKey(row.canonicalWallet)}
                 </Link>
                 <p className="mt-2 text-sm text-mute">

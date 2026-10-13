@@ -39,8 +39,22 @@ function defaultCampaign(): CampaignRecord {
   };
 }
 
+export interface MemoryState {
+  settings: ScoringSettings;
+  campaign: CampaignRecord;
+  users: UserRecord[];
+  snapshots: SnapshotRecord[];
+  callouts: Array<[string, NormalizedCallout[]]>;
+  submissions: SubmissionRecord[];
+  claims: ClaimRecord[];
+  nonces: NonceRecord[];
+  failures: FailureRecord[];
+  audits: AuditRecord[];
+}
+
 export class MemoryStore implements Repository {
   kind = "memory" as const;
+  protected canPersist = true;
   private settings: ScoringSettings = { ...DEFAULT_SETTINGS };
   private campaign: CampaignRecord = defaultCampaign();
   private users = new Map<string, UserRecord>();
@@ -70,6 +84,42 @@ export class MemoryStore implements Repository {
       () => undefined,
     );
     return run;
+  }
+
+  protected persistHook(): void {}
+
+  exportState(): MemoryState {
+    return {
+      settings: { ...this.settings },
+      campaign: { ...this.campaign },
+      users: [...this.users.values()],
+      snapshots: this.snapshots.map((row) => ({ ...row })),
+      callouts: [...this.callouts.entries()],
+      submissions: [...this.submissions],
+      claims: [...this.claims],
+      nonces: [...this.nonces.values()],
+      failures: [...this.failures],
+      audits: [...this.audits],
+    };
+  }
+
+  importState(state: MemoryState): void {
+    this.canPersist = false;
+    try {
+      this.settings = { ...DEFAULT_SETTINGS, ...state.settings };
+      this.campaign = { ...state.campaign };
+      this.users = new Map(state.users.map((user) => [user.id, user]));
+      this.snapshots = [...state.snapshots];
+      this.callouts = new Map(state.callouts);
+      this.submissions = [...state.submissions];
+      this.claims = [...state.claims];
+      this.nonces = new Map(state.nonces.map((nonce) => [nonce.nonce, nonce]));
+      this.failures = [...state.failures];
+      this.audits = [...state.audits];
+      this.rebuild();
+    } finally {
+      this.canPersist = true;
+    }
   }
 
   async getSettings(): Promise<ScoringSettings> {
@@ -241,6 +291,7 @@ export class MemoryStore implements Repository {
 
   async createNonce(nonce: NonceRecord): Promise<void> {
     this.nonces.set(nonce.nonce, nonce);
+    this.persistHook();
   }
 
   async consumeNonce(nonce: string, wallet: string): Promise<NonceRecord | null> {
@@ -248,6 +299,7 @@ export class MemoryStore implements Repository {
       const row = this.nonces.get(nonce);
       if (!row || row.wallet !== wallet || row.usedAt || row.expiresAt < nowIso()) return null;
       row.usedAt = nowIso();
+      this.persistHook();
       return { ...row };
     });
   }
@@ -281,6 +333,7 @@ export class MemoryStore implements Repository {
     for (const row of rows) {
       this.failures.push({ ...row, id: randomUUID(), createdAt: nowIso() });
     }
+    if (rows.length) this.persistHook();
   }
 
   async listFailures(limit: number): Promise<FailureRecord[]> {
@@ -289,6 +342,7 @@ export class MemoryStore implements Repository {
 
   async audit(actor: string, action: string, target: string | null, metadata: Record<string, unknown> = {}): Promise<void> {
     this.audits.push({ id: randomUUID(), actor, action, target, metadata, createdAt: nowIso() });
+    this.persistHook();
   }
 
   async listAudit(limit: number): Promise<AuditRecord[]> {
@@ -304,11 +358,11 @@ export class MemoryStore implements Repository {
     };
   }
 
-  private async rebuild(): Promise<void> {
+  private rebuild(): void {
     const rows: LeaderboardRow[] = [];
     for (const user of this.users.values()) {
       if (user.flagged || user.banned) continue;
-      const snapshot = await this.latestSnapshot(user.id);
+      const snapshot = this.snapshots.filter((row) => row.userId === user.id).at(-1);
       if (!snapshot) continue;
       rows.push({
         rank: 0,
@@ -334,5 +388,6 @@ export class MemoryStore implements Repository {
       row.rank = index + 1;
     });
     this.board = rows;
+    this.persistHook();
   }
 }

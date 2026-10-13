@@ -1,10 +1,13 @@
 import { config } from "@/server/config";
 import type { Repository, SnapshotRecord, UserRecord } from "@/server/db/types";
+import { profilePath, publicProfileKey } from "@/lib/profile-key";
 import { calculatePoints, type PointsBreakdown, type ScoringSettings } from "@/server/points/calculate";
 import { NotPumpProfileError, ProfileNotFoundError, type FetchOutcome, type StatsProvider } from "@/server/pumpfun/types";
 import { hashIp } from "@/server/security/ip";
 import { rateLimit } from "@/server/security/rate-limit";
 import { parseIdentifier } from "@/server/validation/identifier";
+
+export { profilePath, publicProfileKey };
 
 export class ServiceError extends Error {
   constructor(
@@ -42,13 +45,45 @@ async function rankFor(repo: Repository, userId: string): Promise<number | null>
   return board.rows.find((row) => row.userId === userId)?.rank ?? null;
 }
 
-export async function viewProfile(repo: Repository, id: string): Promise<ProfileView> {
-  const user =
+async function findStoredUser(repo: Repository, id: string): Promise<UserRecord | null> {
+  return (
     (await repo.findUserById(id)) ??
     (await repo.findUserByPumpId(id)) ??
     (await repo.findUserByUsername(id)) ??
-    (await repo.findUserByWallet(id));
-  if (!user) throw new ServiceError("That profile is not in this campaign yet.", "not_found", 404);
+    (await repo.findUserByWallet(id))
+  );
+}
+
+export async function viewProfile(
+  repo: Repository,
+  id: string,
+  options?: { provider?: StatsProvider; ip?: string },
+): Promise<ProfileView> {
+  const user = await findStoredUser(repo, id);
+  if (!user) {
+    const parsed = parseIdentifier(id);
+    if (!options?.provider || !parsed.ok) {
+      throw new ServiceError("That profile is not in this campaign yet.", "not_found", 404);
+    }
+    const ip = options.ip ?? "profile-lookup";
+    const limited = rateLimit(
+      `profile-lookup:${hashIp(ip, config.IP_HASH_SALT)}`,
+      30,
+      config.RATE_LIMIT_WINDOW_SECONDS * 1000,
+    );
+    if (!limited.ok) {
+      throw new ServiceError("Too many profile lookups from this network. Try again later.", "rate_limit", 429, {
+        retryAfterSeconds: limited.retryAfterSeconds,
+      });
+    }
+    return submitProfile({
+      repo,
+      provider: options.provider,
+      raw: id,
+      ip,
+      skipRateLimit: true,
+    });
+  }
   const snapshot = await repo.latestSnapshot(user.id);
   const callouts = snapshot ? await repo.listCallouts(snapshot.id) : [];
   return {
@@ -83,20 +118,23 @@ export async function submitProfile(options: {
   raw: string;
   ip: string;
   force?: boolean;
+  skipRateLimit?: boolean;
 }): Promise<ProfileView> {
   const parsed = parseIdentifier(options.raw);
   if (!parsed.ok) throw new ServiceError(parsed.error, "validation", 400);
   const ipHash = hashIp(options.ip, config.IP_HASH_SALT);
-  const limited = rateLimit(`submit:${ipHash}`, config.SUBMISSIONS_PER_WINDOW, config.RATE_LIMIT_WINDOW_SECONDS * 1000);
-  if (!limited.ok) {
-    throw new ServiceError("Too many profile submissions from this network. Try again later.", "rate_limit", 429, {
-      retryAfterSeconds: limited.retryAfterSeconds,
-    });
-  }
-  const since = new Date(Date.now() - config.RATE_LIMIT_WINDOW_SECONDS * 1000).toISOString();
-  const prior = await options.repo.submissionCount(ipHash, since);
-  if (prior >= config.SUBMISSIONS_PER_WINDOW) {
-    throw new ServiceError("Too many profile submissions from this network. Try again later.", "rate_limit", 429);
+  if (!options.skipRateLimit) {
+    const limited = rateLimit(`submit:${ipHash}`, config.SUBMISSIONS_PER_WINDOW, config.RATE_LIMIT_WINDOW_SECONDS * 1000);
+    if (!limited.ok) {
+      throw new ServiceError("Too many profile submissions from this network. Try again later.", "rate_limit", 429, {
+        retryAfterSeconds: limited.retryAfterSeconds,
+      });
+    }
+    const since = new Date(Date.now() - config.RATE_LIMIT_WINDOW_SECONDS * 1000).toISOString();
+    const prior = await options.repo.submissionCount(ipHash, since);
+    if (prior >= config.SUBMISSIONS_PER_WINDOW) {
+      throw new ServiceError("Too many profile submissions from this network. Try again later.", "rate_limit", 429);
+    }
   }
 
   const existing =

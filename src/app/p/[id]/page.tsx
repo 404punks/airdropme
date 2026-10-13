@@ -1,10 +1,14 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { PointsChart } from "@/components/points-chart";
 import { RefreshButton } from "@/components/refresh-button";
 import { Badge } from "@/components/ui/badge";
+import { publicProfileKey } from "@/lib/profile-key";
 import { formatNumber, formatWhen, metricLabel, shortKey } from "@/lib/utils";
 import { getStore } from "@/server/db";
+import { getProvider } from "@/server/pumpfun";
+import { ipFromHeaders } from "@/server/security/ip";
 import { ServiceError, viewProfile } from "@/server/services/profiles";
 
 const toneFor = {
@@ -23,11 +27,20 @@ export default async function ProfilePage({
 }) {
   const { id } = await params;
   const query = await searchParams;
+  const headerList = await headers();
   let view;
   try {
-    view = await viewProfile(getStore(), id);
+    view = await viewProfile(getStore(), id, { provider: getProvider(), ip: ipFromHeaders(headerList) });
   } catch (error) {
-    if (error instanceof ServiceError && error.code === "not_found") notFound();
+    if (error instanceof ServiceError && (error.code === "not_found" || error.code === "not_profile")) notFound();
+    if (error instanceof ServiceError && error.code === "rate_limit") {
+      return (
+        <div className="space-y-3">
+          <h1 className="font-display text-4xl">Slow down</h1>
+          <p className="text-mute">{error.message}</p>
+        </div>
+      );
+    }
     throw error;
   }
   const { user, snapshot, rank, callouts, freshness } = view;
@@ -63,7 +76,7 @@ export default async function ProfilePage({
             </a>
           ) : null}
         </div>
-        <RefreshButton userId={user.id} />
+        <RefreshButton profileKey={publicProfileKey(user)} />
       </div>
       {query.notice ? <p className="rounded-2xl border border-acid/30 bg-acid/10 px-4 py-3 text-sm">{query.notice}</p> : null}
       <p className="text-sm text-mute">{freshnessCopy}</p>

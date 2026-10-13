@@ -36,7 +36,8 @@ const FIXTURES: Record<string, FetchOutcome> = {
 export const demoProvider: StatsProvider = {
   mode: "demo",
   async fetchProfile(lookup: string): Promise<FetchOutcome> {
-    const fixture = FIXTURES[lookup.toLowerCase()];
+    const key = lookup.toLowerCase();
+    const fixture = FIXTURES[key] ?? FIXTURES[key.replaceAll("_", "")];
     if (!fixture) {
       throw new ProfileNotFoundError("Demo mode only recognizes the fixture username DEMO_alpha.");
     }
