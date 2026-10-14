@@ -33,7 +33,7 @@ function defaultCampaign(): CampaignRecord {
     funded: false,
     minPoints: 1,
     description:
-      "Points rank public Pump.fun activity for this campaign. No token allocation is configured or funded, and connecting a wallet only registers a claim request.",
+      "PTS reflect public Pump.fun statistics for this campaign. No token allocation is configured, and a wallet is used only when claiming is open.",
     distributionEnabled: false,
     updatedAt: nowIso(),
   };

@@ -140,7 +140,7 @@ export function explainFormula(settings: ScoringSettings): string[] {
     `${settings.pointsPerRepost} points per verified repost received`,
     "Unavailable or incomplete statistics are not scored.",
     "The score is recomputed from current cumulative public totals. A refresh replaces the score. It does not add the same totals again.",
-    "Points are a campaign ranking device. They do not guarantee a token allocation or any financial return.",
+    "PTS score public statistics. They are not a promise of tokens, price, or a completed airdrop.",
   ];
 }
 

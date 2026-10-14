@@ -9,10 +9,10 @@
 body {
   min-height: 100vh;
   background:
-    radial-gradient(900px 420px at 10% -10%, rgba(155, 123, 255, 0.22), transparent 55%),
-    radial-gradient(700px 380px at 100% 0%, rgba(61, 255, 154, 0.08), transparent 50%),
-    #070b14;
-  color: #e7eefc;
+    radial-gradient(720px 320px at 0% -10%, rgba(91, 140, 255, 0.16), transparent 55%),
+    radial-gradient(640px 280px at 100% 0%, rgba(139, 124, 255, 0.14), transparent 50%),
+    #07080c;
+  color: #f3f5fb;
 }
 
 ::selection {
@@ -24,13 +24,13 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 2px solid #3dff9a;
+  outline: 2px solid #5b8cff;
   outline-offset: 2px;
 }
 
 .wallet-adapter-button {
-  background: #3dff9a !important;
-  color: #07110c !important;
+  background: #5b8cff !important;
+  color: #07080c !important;
   border-radius: 999px !important;
   font-weight: 650 !important;
   height: 44px !important;

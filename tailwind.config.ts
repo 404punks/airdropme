@@ -5,16 +5,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#070b14",
-        navy: "#0c1426",
-        panel: "#121b31",
-        panel2: "#18243d",
-        line: "#2a3b5c",
-        mist: "#e7eefc",
-        mute: "#b7c3dc",
-        violet: "#9b7bff",
-        acid: "#3dff9a",
-        warn: "#ffc46b",
+        ink: "#07080c",
+        navy: "#0e1016",
+        panel: "#141821",
+        panel2: "#1b2130",
+        line: "#2c3344",
+        mist: "#f3f5fb",
+        mute: "#a8b0c2",
+        violet: "#8b7cff",
+        blue: "#5b8cff",
+        acid: "#3ee0a2",
+        warn: "#e2b15a",
         danger: "#ff6b8a",
       },
       fontFamily: {
