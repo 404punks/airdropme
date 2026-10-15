@@ -1,6 +1,9 @@
+import { headers } from "next/headers";
 import Link from "next/link";
+import { CopyLink } from "@/components/copy-link";
+import { ReferralLinkCopy } from "@/components/referral-link-copy";
 import { getReferralRepository, loadReferralState } from "@/server/referrals/service";
-import { REFERRAL_POINTS } from "@/server/referrals/logic";
+import { originFromHeaders, REFERRAL_POINTS } from "@/server/referrals/logic";
 import { formatNumber } from "@/lib/utils";
 
 function safeImage(url: string | null): string | null {
@@ -14,6 +17,7 @@ function safeImage(url: string | null): string | null {
 }
 
 export default async function ReferralsPage() {
+  const origin = originFromHeaders(await headers());
   const store = getReferralRepository();
   let board: Awaited<ReturnType<typeof loadReferralState>>["board"] = [];
   let history: Awaited<ReturnType<typeof loadReferralState>>["history"] = [];
@@ -38,6 +42,8 @@ export default async function ReferralsPage() {
           A referral link uses this website&apos;s domain and your Pump.fun username. When someone joins from that link, you receive {REFERRAL_POINTS} PTS and they receive {REFERRAL_POINTS} PTS.
         </p>
       </section>
+
+      <ReferralLinkCopy origin={origin} />
 
       {unavailable ? (
         <p className="border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-warn">
@@ -69,7 +75,10 @@ export default async function ReferralsPage() {
                 <p className="mt-1 text-sm text-mist">
                   {row.referrals} referrals · {formatNumber(row.points)} PTS
                 </p>
-                <p className="mt-1 truncate text-xs text-blue">{row.link}</p>
+                <div className="mt-2 flex items-center gap-2">
+                  <p className="min-w-0 flex-1 truncate text-xs text-blue">{row.link}</p>
+                  <CopyLink link={row.link} compact />
+                </div>
               </div>
             </li>
           );
@@ -90,7 +99,10 @@ export default async function ReferralsPage() {
                   <span className="text-mute"> referred </span>
                   <span className="text-mist">{row.referredUsername}</span>
                 </p>
-                <p className="mt-1 break-all text-xs text-blue">{row.referralLink}</p>
+                <div className="mt-2 flex items-center gap-2">
+                  <p className="min-w-0 flex-1 break-all text-xs text-blue">{row.referralLink}</p>
+                  <CopyLink link={row.referralLink} compact />
+                </div>
                 <p className="mt-1 text-mute">
                   {row.domain} · {row.referrerPoints} PTS to the referrer · {row.referredPoints} PTS to the new account
                 </p>

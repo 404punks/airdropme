@@ -29,11 +29,6 @@ export default async function ClaimPage() {
           claiming is available.
         </p>
         <InactiveClaimButton className="mt-6" />
-        <div className="mt-4 border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-warn">
-          {claimOpen
-            ? "Claiming is open. Token distribution still depends on a configured distributor."
-            : "Claim coming soon. Wallet connection and claim submission stay closed until the campaign is open."}
-        </div>
       </section>
 
       <ol className="space-y-3">
