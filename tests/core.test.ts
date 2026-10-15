@@ -353,7 +353,7 @@ describe("claims", () => {
     const user = await repo.findUserByWallet(address);
     const nonce = "nonce-1";
     const message = buildClaimMessage({
-      domain: "AirdropMe",
+      domain: "Callout Drop",
       username: "signer",
       pumpUserId: "pump-1",
       wallet: address,
@@ -436,7 +436,7 @@ describe("claims", () => {
     const user = (await repo.findUserByWallet(address))!;
     const nonce = "nonce-pending";
     const message = buildClaimMessage({
-      domain: "AirdropMe",
+      domain: "Callout Drop",
       username: "pending",
       pumpUserId: "pump-2",
       wallet: address,

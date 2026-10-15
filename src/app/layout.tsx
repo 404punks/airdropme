@@ -7,8 +7,8 @@ const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit" });
 const syne = Syne({ subsets: ["latin"], variable: "--font-syne" });
 
 export const metadata: Metadata = {
-  title: "Ansemmas PTS",
-  description: "Check Pump.fun points and airdrop eligibility with a public username or wallet address.",
+  title: "Callout Drop",
+  description: "Callout Drop checks Pump.fun points and airdrop eligibility with a public username or wallet address.",
   icons: { icon: "/logo.png" },
 };
 

@@ -1,4 +1,5 @@
 export const REFERRAL_POINTS = 170;
+export const REFERRAL_LEADERBOARD_LIMIT = 100;
 export const REFERRAL_ATTACH_WINDOW_MS = 15 * 60 * 1000;
 export const DEFAULT_SITE_ORIGIN = "https://www.ansemmasx.fun";
 
@@ -140,10 +141,16 @@ export function pointsFromHistory(username: string, rows: ReferralHistoryRecord[
 
 export function referralLeaderboard(rows: ReferralHistoryRecord[], links: ReferralLinkRecord[]): ReferralBoardRow[] {
   const grouped = new Map<string, ReferralBoardRow>();
+  const counted = new Set<string>();
   for (const row of rows) {
-    const key = row.referrerUsername.toLowerCase();
+    const key = row.referrerUsername.trim().toLowerCase();
+    const referred = row.referredUsername.trim().toLowerCase();
+    if (!key || !referred || key === referred) continue;
+    const pair = `${key}\0${referred}`;
+    if (counted.has(pair)) continue;
+    counted.add(pair);
     const current = grouped.get(key) ?? {
-      username: row.referrerUsername,
+      username: row.referrerUsername.trim(),
       profileImage: row.referrerImage,
       referrals: 0,
       points: 0,
@@ -164,5 +171,7 @@ export function referralLeaderboard(rows: ReferralHistoryRecord[], links: Referr
     current.link = link.link;
     current.domain = link.domain;
   }
-  return [...grouped.values()].sort((a, b) => b.referrals - a.referrals || a.username.localeCompare(b.username));
+  return [...grouped.values()]
+    .sort((a, b) => b.referrals - a.referrals || b.points - a.points || a.username.localeCompare(b.username))
+    .slice(0, REFERRAL_LEADERBOARD_LIMIT);
 }

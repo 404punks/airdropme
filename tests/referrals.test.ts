@@ -9,7 +9,9 @@ import {
   referralLeaderboard,
   referralUrl,
   siteOriginFromHost,
+  REFERRAL_LEADERBOARD_LIMIT,
   REFERRAL_POINTS,
+  type ReferralHistoryRecord,
 } from "@/server/referrals/logic";
 import { MemoryReferralStore } from "@/server/referrals/memory";
 import { applyReferral } from "@/server/referrals/service";
@@ -104,6 +106,51 @@ describe("referral rules", () => {
       ["Zed", 1, 170, origin, "https://www.ansemmasx.fun/r/Zed"],
     ]);
     expect(board[0].profileImage).toBe("https://cdn.example/a.png");
+    expect(board.find((row) => row.username === "Beta")).toBeUndefined();
+  });
+
+  it("counts each joined account once and keeps the top 100 referrers", () => {
+    const createdAt = "2026-10-15T00:00:00.000Z";
+    const rows: ReferralHistoryRecord[] = [];
+    for (let index = 0; index < 101; index += 1) {
+      const plan = planReferral({
+        referrerUsername: `User${String(index).padStart(3, "0")}`,
+        referredUsername: `Join${index}`,
+        origin,
+        createdAt,
+      });
+      if (!plan.ok) throw new Error("plan should be valid");
+      rows.push(plan.history, { ...plan.history, id: `${plan.history.id}-duplicate` });
+    }
+    const extra = planReferral({
+      referrerUsername: "User000",
+      referredUsername: "JoinExtra",
+      referrerImage: "https://cdn.example/top.png",
+      origin,
+      createdAt,
+    });
+    if (!extra.ok) throw new Error("plan should be valid");
+    rows.push(extra.history);
+    const board = referralLeaderboard(rows, [
+      {
+        username: "User000",
+        profileImage: "https://cdn.example/top.png",
+        link: referralUrl(origin, "User000"),
+        domain: origin,
+        createdAt,
+      },
+    ]);
+    expect(REFERRAL_LEADERBOARD_LIMIT).toBe(100);
+    expect(board).toHaveLength(100);
+    expect(board[0]).toMatchObject({
+      username: "User000",
+      profileImage: "https://cdn.example/top.png",
+      referrals: 2,
+      points: 340,
+    });
+    expect(board.some((row) => row.username === "User100")).toBe(false);
+    expect(board[1].referrals).toBe(1);
+    expect(board[1].points).toBe(170);
   });
 
   it("keeps the referral result on the profile notice", () => {
