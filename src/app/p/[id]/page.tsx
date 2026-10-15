@@ -4,8 +4,11 @@ import { notFound } from "next/navigation";
 import { PtsResults } from "@/components/pts-results";
 import { getStore } from "@/server/db";
 import { getProvider } from "@/server/pumpfun";
+import { referrerFromCookieHeader } from "@/server/referrals/cookie";
+import { originFromHeaders } from "@/server/referrals/logic";
+import { getReferralRepository, loadReferralState, publishReferralLink, summaryFor } from "@/server/referrals/service";
 import { ipFromHeaders } from "@/server/security/ip";
-import { ServiceError, viewProfile } from "@/server/services/profiles";
+import { profileReferralLink, ServiceError, viewProfile } from "@/server/services/profiles";
 
 export default async function ProfilePage({
   params,
@@ -17,9 +20,15 @@ export default async function ProfilePage({
   const { id } = await params;
   const query = await searchParams;
   const headerList = await headers();
+  const origin = originFromHeaders(headerList);
   let view;
   try {
-    view = await viewProfile(getStore(), id, { provider: getProvider(), ip: ipFromHeaders(headerList) });
+    view = await viewProfile(getStore(), id, {
+      provider: getProvider(),
+      ip: ipFromHeaders(headerList),
+      referrerUsername: referrerFromCookieHeader(headerList.get("cookie")),
+      origin,
+    });
   } catch (error) {
     if (error instanceof ServiceError && (error.code === "not_found" || error.code === "not_profile")) notFound();
     if (error instanceof ServiceError && error.code === "rate_limit") {
@@ -47,6 +56,33 @@ export default async function ProfilePage({
     throw error;
   }
   const campaign = await getStore().getCampaign();
+  const referral = {
+    link: profileReferralLink(view.user.username, origin),
+    points: 0,
+    made: 0,
+    joined: 0,
+    history: [] as Awaited<ReturnType<typeof loadReferralState>>["history"],
+    unavailable: false,
+  };
+  const referrals = getReferralRepository();
+  if (!referrals) referral.unavailable = Boolean(view.user.username);
+  else if (view.user.username) {
+    try {
+      await publishReferralLink(referrals, {
+        username: view.user.username,
+        profileImage: view.user.profileImage,
+        origin,
+      });
+      const state = await loadReferralState(referrals);
+      const summary = summaryFor(view.user.username, state.history);
+      referral.points = summary.points;
+      referral.made = summary.made;
+      referral.joined = summary.joined;
+      referral.history = summary.history;
+    } catch {
+      referral.unavailable = true;
+    }
+  }
   return (
     <PtsResults
       user={view.user}
@@ -55,6 +91,7 @@ export default async function ProfilePage({
       freshness={view.freshness}
       notice={query.notice}
       campaign={campaign}
+      referral={referral}
     />
   );
 }

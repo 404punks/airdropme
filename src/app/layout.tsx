@@ -9,6 +9,7 @@ const syne = Syne({ subsets: ["latin"], variable: "--font-syne" });
 export const metadata: Metadata = {
   title: "Ansemmas PTS",
   description: "Check Pump.fun points and airdrop eligibility with a public username or wallet address.",
+  icons: { icon: "/logo.png" },
 };
 
 export const viewport: Viewport = {

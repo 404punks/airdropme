@@ -1,0 +1,13 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /referralHistory/{id} {
+      allow read, create: if true;
+      allow update, delete: if false;
+    }
+    match /referralLinks/{id} {
+      allow read, create, update: if true;
+      allow delete: if false;
+    }
+  }
+}

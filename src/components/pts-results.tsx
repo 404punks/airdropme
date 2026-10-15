@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CopyAddress } from "@/components/copy-address";
 import { InactiveClaimButton } from "@/components/inactive-claim-button";
 import { PointsChart } from "@/components/points-chart";
+import { ReferralPanel } from "@/components/referral-panel";
 import { RefreshButton } from "@/components/refresh-button";
 import { Badge } from "@/components/ui/badge";
 import { qualification } from "@/lib/eligibility";
@@ -9,6 +10,7 @@ import { profileNotice } from "@/lib/notices";
 import { publicProfileKey } from "@/lib/profile-key";
 import { formatNumber, formatWhen, metricLabel, shortKey } from "@/lib/utils";
 import type { CampaignRecord, SnapshotRecord, UserRecord } from "@/server/db/types";
+import type { ReferralHistoryRecord } from "@/server/referrals/logic";
 import type { NormalizedCallout } from "@/server/pumpfun/types";
 
 const toneFor = {
@@ -41,6 +43,7 @@ export function PtsResults({
   freshness,
   notice,
   campaign,
+  referral,
 }: {
   user: UserRecord;
   snapshot: SnapshotRecord | null;
@@ -48,12 +51,22 @@ export function PtsResults({
   freshness: "recent" | "cached" | "stale" | "demo" | "empty";
   notice?: string;
   campaign: CampaignRecord;
+  referral: {
+    link: string | null;
+    points: number;
+    made: number;
+    joined: number;
+    history: ReferralHistoryRecord[];
+    unavailable: boolean;
+  };
 }) {
   const image = safeImage(user.profileImage);
   const note = profileNotice(notice);
+  const referralPoints = referral.unavailable ? 0 : referral.points;
+  const totalPoints = user.currentPoints + referralPoints;
   const status = qualification({
     hasSnapshot: Boolean(snapshot),
-    points: user.currentPoints,
+    points: totalPoints,
     minPoints: campaign.minPoints,
     banned: user.banned,
     flagged: user.flagged,
@@ -105,7 +118,12 @@ export function PtsResults({
       <section className="grid gap-3 lg:grid-cols-[0.9fr_1.1fr]">
         <article className="min-w-0 border border-line border-t-2 border-t-blue bg-panel p-4 sm:p-5">
           <p className="text-xs uppercase tracking-[0.16em] text-mute">Total PTS</p>
-          <p className="mt-3 font-display text-6xl leading-none tabular-nums text-mist">{formatNumber(user.currentPoints)}</p>
+          <p className="mt-3 font-display text-6xl leading-none tabular-nums text-mist">{formatNumber(totalPoints)}</p>
+          {referralPoints > 0 ? (
+            <p className="mt-3 text-sm text-mute">
+              {formatNumber(user.currentPoints)} from Pump.fun and {formatNumber(referralPoints)} from referrals.
+            </p>
+          ) : null}
           <div className="mt-4">
             {status.status === "unavailable" ? (
               <p className="break-words text-sm text-mute">Your eligibility status is currently unavailable. Please try again later.</p>
@@ -140,6 +158,16 @@ export function PtsResults({
           </div>
         </article>
       </section>
+
+      <ReferralPanel
+        username={user.username}
+        link={referral.link}
+        points={referral.points}
+        made={referral.made}
+        joined={referral.joined}
+        history={referral.history}
+        unavailable={referral.unavailable}
+      />
 
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
