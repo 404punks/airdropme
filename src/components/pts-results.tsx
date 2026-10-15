@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CopyAddress } from "@/components/copy-address";
+import { CopyLink } from "@/components/copy-link";
 import { InactiveClaimButton } from "@/components/inactive-claim-button";
 import { PointsChart } from "@/components/points-chart";
 import { ReferralPanel } from "@/components/referral-panel";
@@ -114,6 +115,15 @@ export function PtsResults({
 
       {note ? <p className="rounded-none border border-blue/30 bg-blue/10 px-4 py-3 text-sm text-mist">{note}</p> : null}
       <p className="text-sm text-mute">{freshnessCopy}</p>
+      {referral.link ? (
+        <section className="border border-line bg-panel p-4 sm:p-5">
+          <h2 className="font-display text-xl">Your referral link</h2>
+          <p className="mt-2 text-sm text-mute">Share this link. A new account that joins from it receives 170 PTS, and you receive 170 PTS.</p>
+          <div className="mt-4">
+            <CopyLink link={referral.link} />
+          </div>
+        </section>
+      ) : null}
 
       <section className="grid gap-3 lg:grid-cols-[0.9fr_1.1fr]">
         <article className="min-w-0 border border-line border-t-2 border-t-blue bg-panel p-4 sm:p-5">
