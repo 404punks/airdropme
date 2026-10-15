@@ -79,7 +79,7 @@ export async function issueNonce(options: {
   const nonce = createNonce();
   const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
   const message = buildClaimMessage({
-    domain: "AirdropMe",
+    domain: "Callout Drop",
     username: user.username,
     pumpUserId: user.pumpUserId,
     wallet: options.wallet,

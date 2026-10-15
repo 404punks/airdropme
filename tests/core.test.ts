@@ -353,7 +353,7 @@ describe("claims", () => {
     const user = await repo.findUserByWallet(address);
     const nonce = "nonce-1";
     const message = buildClaimMessage({
-      domain: "AirdropMe",
+      domain: "Callout Drop",
       username: "signer",
       pumpUserId: "pump-1",
       wallet: address,
@@ -436,7 +436,7 @@ describe("claims", () => {
     const user = (await repo.findUserByWallet(address))!;
     const nonce = "nonce-pending";
     const message = buildClaimMessage({
-      domain: "AirdropMe",
+      domain: "Callout Drop",
       username: "pending",
       pumpUserId: "pump-2",
       wallet: address,
@@ -591,6 +591,22 @@ describe("missing database", () => {
       PGDATABASE: "airdropme",
     });
     expect(config.DATABASE_URL).toBe("postgresql://airdrop:p%40ss@db.internal:5432/airdropme");
+  });
+
+  it("connects the Firebase API from env", () => {
+    const connected = readConfig({
+      FIREBASE_PROJECT_ID: "callout-drop",
+      FIREBASE_API_KEY: "test-key",
+    });
+    expect(connected.firebaseConnected).toBe(true);
+    expect(connected.firebase).toMatchObject({
+      projectId: "callout-drop",
+      apiKey: "test-key",
+      base: "https://firestore.googleapis.com",
+    });
+    const missing = readConfig({});
+    expect(missing.firebase).toBeNull();
+    expect(missing.firebaseConnected).toBe(false);
   });
 });
 
