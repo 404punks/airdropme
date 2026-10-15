@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { readFirebaseConfig, type FirebaseConfig } from "@/server/referrals/firestore";
 
 const schema = z.object({
   PUMPFUN_API_BASE_URL: z.string().default("https://frontend-api-v3.pump.fun"),
@@ -17,11 +18,22 @@ const schema = z.object({
   RATE_LIMIT_WINDOW_SECONDS: z.coerce.number().int().positive().default(600),
   CALLOUT_PAGE_LIMIT: z.coerce.number().int().min(1).max(100).default(50),
   CALLOUT_MAX_PAGES: z.coerce.number().int().min(1).max(40).default(20),
+  SITE_URL: z.string().default(""),
+  NEXT_PUBLIC_SITE_URL: z.string().default(""),
+  FIREBASE_PROJECT_ID: z.string().default(""),
+  FIREBASE_API_KEY: z.string().default(""),
+  FIREBASE_CLIENT_EMAIL: z.string().default(""),
+  FIREBASE_PRIVATE_KEY: z.string().default(""),
+  FIREBASE_API_BASE: z.string().default(""),
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID: z.string().default(""),
+  NEXT_PUBLIC_FIREBASE_API_KEY: z.string().default(""),
 });
 
 export type AppConfig = z.infer<typeof schema> & {
   distributionEnabled: boolean;
   adminEnabled: boolean;
+  firebase: FirebaseConfig | null;
+  firebaseConnected: boolean;
 };
 
 const DATABASE_ENV_KEYS = [
@@ -54,11 +66,14 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
   const adminEnabled = Boolean(
     parsed.ADMIN_EMAIL && parsed.ADMIN_PASSWORD && parsed.ADMIN_SESSION_SECRET.length >= 16,
   );
+  const firebase = readFirebaseConfig(env);
   return {
     ...parsed,
     DATABASE_URL: resolveDatabaseUrl(env),
     distributionEnabled: parsed.DISTRIBUTION_ENABLED === "true",
     adminEnabled,
+    firebase,
+    firebaseConnected: firebase != null,
   };
 }
 

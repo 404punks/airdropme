@@ -592,6 +592,22 @@ describe("missing database", () => {
     });
     expect(config.DATABASE_URL).toBe("postgresql://airdrop:p%40ss@db.internal:5432/airdropme");
   });
+
+  it("connects the Firebase API from env", () => {
+    const connected = readConfig({
+      FIREBASE_PROJECT_ID: "callout-drop",
+      FIREBASE_API_KEY: "test-key",
+    });
+    expect(connected.firebaseConnected).toBe(true);
+    expect(connected.firebase).toMatchObject({
+      projectId: "callout-drop",
+      apiKey: "test-key",
+      base: "https://firestore.googleapis.com",
+    });
+    const missing = readConfig({});
+    expect(missing.firebase).toBeNull();
+    expect(missing.firebaseConnected).toBe(false);
+  });
 });
 
 function pointsFor(followers: number) {

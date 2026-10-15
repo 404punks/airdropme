@@ -8,7 +8,8 @@ import {
   type ReferralHistoryRecord,
   type ReferralLinkRecord,
 } from "@/server/referrals/logic";
-import { FirestoreReferralStore, readFirebaseConfig } from "@/server/referrals/firestore";
+import { config } from "@/server/config";
+import { FirestoreReferralStore } from "@/server/referrals/firestore";
 import type { ReferralRepository } from "@/server/referrals/repository";
 
 export interface ReferralGrant {
@@ -18,14 +19,13 @@ export interface ReferralGrant {
 
 let cachedStore: ReferralRepository | null = null;
 
-export function firebaseConfigured(env: NodeJS.ProcessEnv = process.env): boolean {
-  return readFirebaseConfig(env) != null;
+export function firebaseConfigured(): boolean {
+  return config.firebaseConnected;
 }
 
-export function getReferralRepository(env: NodeJS.ProcessEnv = process.env): ReferralRepository | null {
-  const config = readFirebaseConfig(env);
-  if (!config) return null;
-  if (!cachedStore) cachedStore = new FirestoreReferralStore(config);
+export function getReferralRepository(): ReferralRepository | null {
+  if (!config.firebase) return null;
+  if (!cachedStore) cachedStore = new FirestoreReferralStore(config.firebase);
   return cachedStore;
 }
 
