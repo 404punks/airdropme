@@ -18,7 +18,7 @@ export default async function CampaignPage() {
         <p className="mt-3 max-w-3xl text-mute">{campaign.description}</p>
       </div>
       <section className="grid gap-4 md:grid-cols-2">
-        <article className="rounded-3xl border border-line bg-panel p-5">
+        <article className="rounded-none border border-line bg-panel p-5">
           <h2 className="font-display text-xl">Schedule</h2>
           <dl className="mt-4 space-y-1 text-sm text-mute">
             <div>Starts: {formatWhen(campaign.startsAt)}</div>
@@ -28,7 +28,7 @@ export default async function CampaignPage() {
             </div>
           </dl>
         </article>
-        <article className="rounded-3xl border border-line bg-panel p-5">
+        <article className="rounded-none border border-line bg-panel p-5">
           <h2 className="font-display text-xl">Allocation</h2>
           <p className="mt-3 text-2xl">{allocation ?? "Not configured"}</p>
           <p className="mt-2 text-sm text-mute">
@@ -38,7 +38,7 @@ export default async function CampaignPage() {
           </p>
         </article>
       </section>
-      <section className="rounded-3xl border border-line bg-navy p-5">
+      <section className="rounded-none border border-line bg-navy p-5">
         <h2 className="font-display text-xl">Claim rules</h2>
         <ul className="mt-3 space-y-2 text-sm text-mute">
           <li>At least {campaign.minPoints.toLocaleString("en-US")} PTS from verified statistics.</li>
@@ -52,7 +52,7 @@ export default async function CampaignPage() {
           </li>
         </ul>
       </section>
-      <section className="rounded-3xl border border-line bg-panel p-5">
+      <section className="rounded-none border border-line bg-panel p-5">
         <h2 className="font-display text-xl">Point rules</h2>
         <ul className="mt-3 space-y-2 text-sm">
           {explainFormula(settings).map((line) => (

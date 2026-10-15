@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MobileNav } from "@/components/mobile-nav";
 import { config } from "@/server/config";
 import { getStore } from "@/server/db";
 
@@ -12,42 +13,47 @@ const links = [
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const store = getStore();
   return (
-    <div className="mx-auto flex min-h-screen max-w-5xl flex-col px-4 pb-16 pt-5 sm:px-6">
-      <header className="mb-8 flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-line bg-navy/90 px-4 py-3 shadow-card">
-        <Link href="/" className="font-display text-lg font-semibold tracking-tight">
-          Ansemmas <span className="text-blue">PTS</span>
-        </Link>
-        <nav className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-mute" aria-label="Primary">
-          {links.map(([label, href]) => (
-            <Link key={href} href={href} className="rounded-full px-1 py-1 hover:text-white">
-              {label}
-            </Link>
-          ))}
-        </nav>
+    <div className="mx-auto flex min-h-screen max-w-5xl flex-col">
+      <header className="sticky top-0 z-20 border-b border-line bg-ink/95 pt-[env(safe-area-inset-top)] backdrop-blur">
+        <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
+          <Link href="/" className="font-display text-base font-semibold tracking-tight">
+            Ansemmas <span className="text-blue">PTS</span>
+          </Link>
+          <nav className="hidden gap-5 text-sm text-mute md:flex" aria-label="Primary">
+            {links.map(([label, href]) => (
+              <Link key={href} href={href} className="hover:text-white">
+                {label}
+              </Link>
+            ))}
+          </nav>
+        </div>
       </header>
-      {config.PUMPFUN_DATA_MODE === "demo" ? (
-        <p className="mb-6 rounded-2xl border border-violet/30 bg-violet/10 px-4 py-3 text-sm text-violet">
-          Demo mode is on. The figures on this server are sample data, not live Pump.fun statistics.
-        </p>
-      ) : null}
-      <main className="flex-1">{children}</main>
-      <footer className="mt-16 space-y-3 border-t border-line pt-6 text-sm text-mute">
-        <p>
-          PTS are calculated from public Pump.fun statistics. They are not a promise of tokens, price, or a completed
-          airdrop. A wallet is required only when claiming is open.
-        </p>
-        {store.kind === "memory" ? (
-          <p>This server is not using a shared database. Profile checks still use public Pump.fun data.</p>
+      <div className="flex flex-1 flex-col px-4 pb-24 pt-4 sm:px-6 md:pb-12 md:pt-6">
+        {config.PUMPFUN_DATA_MODE === "demo" ? (
+          <p className="mb-4 border border-violet/30 bg-violet/10 px-3 py-2 text-sm text-violet">
+            Demo mode is on. The figures on this server are sample data, not live Pump.fun statistics.
+          </p>
         ) : null}
-        <p className="flex flex-wrap gap-4">
-          <Link className="hover:text-white" href="/how-it-works">
-            How it works
-          </Link>
-          <Link className="hover:text-white" href="/data-sources">
-            Data sources
-          </Link>
-        </p>
-      </footer>
+        <main className="flex-1">{children}</main>
+        <footer className="mt-10 space-y-3 border-t border-line pt-5 text-xs leading-5 text-mute sm:text-sm">
+          <p>
+            PTS are calculated from public Pump.fun statistics. They are not a promise of tokens, price, or a completed
+            airdrop. A wallet is required only when claiming is open.
+          </p>
+          {store.kind === "memory" ? (
+            <p>This server is not using a shared database. Profile checks still use public Pump.fun data.</p>
+          ) : null}
+          <p className="flex flex-wrap gap-4">
+            <Link className="hover:text-white" href="/how-it-works">
+              How it works
+            </Link>
+            <Link className="hover:text-white" href="/data-sources">
+              Data sources
+            </Link>
+          </p>
+        </footer>
+      </div>
+      <MobileNav />
     </div>
   );
 }

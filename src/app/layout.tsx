@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Outfit, Syne } from "next/font/google";
 import { SiteShell } from "@/components/site-shell";
 import "./globals.css";
@@ -9,6 +9,12 @@ const syne = Syne({ subsets: ["latin"], variable: "--font-syne" });
 export const metadata: Metadata = {
   title: "Ansemmas PTS",
   description: "Check Pump.fun points and airdrop eligibility with a public username or wallet address.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export const dynamic = "force-dynamic";

@@ -8,10 +8,7 @@
 
 body {
   min-height: 100vh;
-  background:
-    radial-gradient(720px 320px at 0% -10%, rgba(91, 140, 255, 0.16), transparent 55%),
-    radial-gradient(640px 280px at 100% 0%, rgba(139, 124, 255, 0.14), transparent 50%),
-    #07080c;
+  background: #07080c;
   color: #f3f5fb;
 }
 
@@ -31,7 +28,7 @@ textarea:focus-visible {
 .wallet-adapter-button {
   background: #5b8cff !important;
   color: #07080c !important;
-  border-radius: 999px !important;
+  border-radius: 0 !important;
   font-weight: 650 !important;
   height: 44px !important;
 }

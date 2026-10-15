@@ -8,7 +8,7 @@ export default function DataSourcesPage() {
           github.com/BankkRoll/pumpfun-apis only as a map. That repository is not an official Pump.fun spec.
         </p>
       </div>
-      <div className="overflow-x-auto rounded-3xl border border-line">
+      <div className="overflow-x-auto rounded-none border border-line">
         <table className="w-full min-w-[760px] text-left text-sm">
           <thead className="bg-panel text-mute">
             <tr>

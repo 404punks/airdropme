@@ -13,9 +13,9 @@ const faqs = [
 export default async function HowItWorksPage() {
   const settings = await getStore().getSettings();
   return (
-    <div className="space-y-10">
+    <div className="space-y-4 sm:space-y-6">
       <div>
-        <h1 className="font-display text-4xl font-semibold">How It Works</h1>
+        <h1 className="font-display text-3xl font-semibold sm:text-4xl">How It Works</h1>
         <p className="mt-4 max-w-2xl text-mute">
           Ansemmas PTS reads public Pump.fun statistics, calculates a score, and will open claiming only when the
           campaign is actually ready.
@@ -27,13 +27,13 @@ export default async function HowItWorksPage() {
           ["2. Review public data", "The server requests the profile, follower count, and Callout statistics from fixed Pump.fun paths."],
           ["3. See your PTS", "Each verified total is scored once. A refresh replaces the previous score."],
         ].map(([title, copy]) => (
-          <li key={title} className="rounded-3xl border border-line bg-panel p-5">
+          <li key={title} className="rounded-none border border-line bg-panel p-5">
             <h2 className="font-display text-xl">{title}</h2>
             <p className="mt-2 text-sm leading-6 text-mute">{copy}</p>
           </li>
         ))}
       </ol>
-      <section className="rounded-3xl border border-line bg-navy p-5 sm:p-6">
+      <section className="rounded-none border border-line bg-navy p-5 sm:p-6">
         <h2 className="font-display text-2xl">Point rules</h2>
         <ul className="mt-4 space-y-2 text-sm">
           {explainFormula(settings).map((line) => (
@@ -44,7 +44,7 @@ export default async function HowItWorksPage() {
       <section id="faq" className="space-y-3">
         <h2 className="font-display text-2xl">Questions</h2>
         {faqs.map(([question, answer]) => (
-          <details key={question} className="rounded-3xl border border-line bg-panel p-4">
+          <details key={question} className="rounded-none border border-line bg-panel p-4">
             <summary className="cursor-pointer font-medium">{question}</summary>
             <p className="mt-2 text-sm leading-6 text-mute">{answer}</p>
           </details>

@@ -30,8 +30,8 @@ export function RefreshButton({ profileKey }: { profileKey: string }) {
   }
 
   return (
-    <div className="space-y-2">
-      <Button type="button" variant="outline" onClick={refresh} disabled={pending}>
+    <div className="w-full space-y-2 sm:w-auto">
+      <Button type="button" variant="outline" onClick={refresh} disabled={pending} className="w-full sm:w-auto">
         {pending ? "Refreshing…" : "Refresh points"}
       </Button>
       {error ? <p className="text-sm text-danger">{error}</p> : null}

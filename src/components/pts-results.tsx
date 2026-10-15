@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CopyAddress } from "@/components/copy-address";
+import { InactiveClaimButton } from "@/components/inactive-claim-button";
 import { PointsChart } from "@/components/points-chart";
 import { RefreshButton } from "@/components/refresh-button";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,11 @@ const toneFor = {
   unavailable: "unavailable",
   incomplete: "cached",
 } as const;
+
+function tileFigure(status: string, value: number | null): string {
+  if ((status === "demo" || status === "verified") && value != null) return formatNumber(value);
+  return metricLabel(status, value);
+}
 
 function safeImage(url: string | null): string | null {
   if (!url) return null;
@@ -71,19 +77,19 @@ export function PtsResults({
     : [];
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="space-y-3 sm:space-y-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 items-start gap-4">
           {image ? (
-            <img src={image} alt="" className="h-16 w-16 rounded-2xl border border-line object-cover" />
+            <img src={image} alt="" className="h-16 w-16 rounded-none border border-line object-cover" />
           ) : (
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-line bg-panel2 text-lg font-semibold text-blue">
+            <div className="flex h-16 w-16 items-center justify-center rounded-none border border-line bg-panel2 text-lg font-semibold text-blue">
               {(user.username ?? "P").slice(0, 1).toUpperCase()}
             </div>
           )}
           <div className="min-w-0">
             <p className="text-sm text-mute">Profile overview</p>
-            <h1 className="font-display text-3xl sm:text-4xl">{user.username ?? "Unnamed profile"}</h1>
+            <h1 className="break-words font-display text-3xl leading-tight sm:text-4xl">{user.username ?? "Unnamed profile"}</h1>
             <p className="mt-2 text-sm text-mute">
               {user.canonicalWallet ? <CopyAddress address={user.canonicalWallet} /> : shortKey(user.canonicalWallet)}
             </p>
@@ -93,40 +99,41 @@ export function PtsResults({
         <RefreshButton profileKey={publicProfileKey(user)} />
       </div>
 
-      {note ? <p className="rounded-2xl border border-blue/30 bg-blue/10 px-4 py-3 text-sm text-mist">{note}</p> : null}
+      {note ? <p className="rounded-none border border-blue/30 bg-blue/10 px-4 py-3 text-sm text-mist">{note}</p> : null}
       <p className="text-sm text-mute">{freshnessCopy}</p>
 
-      <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-        <article className="rounded-3xl border border-line bg-panel p-5 shadow-card">
-          <p className="text-sm text-mute">Total PTS</p>
-          <p className="mt-2 font-display text-5xl text-mist">{formatNumber(user.currentPoints)}</p>
+      <section className="grid gap-3 lg:grid-cols-[0.9fr_1.1fr]">
+        <article className="min-w-0 border border-line border-t-2 border-t-blue bg-panel p-4 sm:p-5">
+          <p className="text-xs uppercase tracking-[0.16em] text-mute">Total PTS</p>
+          <p className="mt-3 font-display text-6xl leading-none tabular-nums text-mist">{formatNumber(user.currentPoints)}</p>
           <div className="mt-4">
             {status.status === "unavailable" ? (
-              <p className="text-sm text-mute">Your eligibility status is currently unavailable. Please try again later.</p>
+              <p className="break-words text-sm text-mute">Your eligibility status is currently unavailable. Please try again later.</p>
             ) : null}
             {status.status === "not_eligible" ? (
               <div className="space-y-2">
                 <Badge tone="unavailable">Not Eligible</Badge>
-                <p className="text-sm text-mute">{status.reason}</p>
+                <p className="break-words text-sm text-mute">{status.reason}</p>
               </div>
             ) : null}
             {status.status === "claim_coming_soon" ? (
               <div className="space-y-2">
                 <Badge tone="cached">Claim coming soon</Badge>
-                <p className="text-sm text-mute">{status.detail}</p>
+                <p className="break-words text-sm text-mute">{status.detail}</p>
               </div>
             ) : null}
             {status.status === "eligible" ? (
               <div className="space-y-2">
                 <Badge tone="live">Eligible</Badge>
-                <p className="text-sm text-mute">{status.detail}</p>
+                <p className="break-words text-sm text-mute">{status.detail}</p>
               </div>
             ) : null}
           </div>
           <p className="mt-4 text-sm text-mute">Current points requirement: {campaign.minPoints.toLocaleString("en-US")} PTS.</p>
           {user.flagged && user.flagReason ? <p className="mt-2 text-sm text-warn">{user.flagReason}</p> : null}
+          <InactiveClaimButton className="mt-5" />
         </article>
-        <article className="rounded-3xl border border-line bg-panel p-5 shadow-card">
+        <article className="min-w-0 border border-line bg-panel p-4 sm:p-5">
           <h2 className="font-display text-xl">PTS breakdown</h2>
           <div className="mt-4">
             {snapshot ? <PointsChart components={snapshot.pointsBreakdown.components} /> : <p className="text-sm text-mute">No points data is currently available for this account.</p>}
@@ -134,27 +141,37 @@ export function PtsResults({
         </article>
       </section>
 
-      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
           ["Followers", snapshot?.followersStatus, snapshot?.followers],
           ["Callouts", snapshot?.calloutsStatus, snapshot?.callouts],
           ["Likes", snapshot?.likesStatus, snapshot?.likes],
           ["Reposts", snapshot?.repostsStatus, snapshot?.reposts],
         ].map(([label, metricStatus, value]) => (
-          <article key={String(label)} className="rounded-3xl border border-line bg-navy p-4">
-            <div className="flex items-center justify-between gap-2">
-              <p className="text-sm text-mute">{label}</p>
-              <Badge tone={toneFor[(metricStatus as keyof typeof toneFor) ?? "unavailable"]}>{String(metricStatus ?? "empty")}</Badge>
-            </div>
-            <p className="mt-3 font-display text-2xl">{metricLabel(String(metricStatus ?? "unavailable"), (value as number | null) ?? null)}</p>
+          <article key={String(label)} className="flex aspect-square min-w-0 flex-col justify-between border border-line bg-navy p-4 sm:aspect-auto sm:min-h-36">
+            <p className="text-xs uppercase tracking-[0.14em] text-mute">{label}</p>
+            <p className="break-words font-display text-3xl leading-none">{tileFigure(String(metricStatus ?? "unavailable"), (value as number | null) ?? null)}</p>
+            <Badge className="w-fit" tone={toneFor[(metricStatus as keyof typeof toneFor) ?? "unavailable"]}>{String(metricStatus ?? "empty")}</Badge>
           </article>
         ))}
       </section>
 
       {rows.length > 0 ? (
-        <section className="overflow-x-auto rounded-3xl border border-line bg-panel p-5">
+        <section className="min-w-0 rounded-none border border-line bg-panel p-4 sm:p-5">
           <h2 className="font-display text-xl">Verified values</h2>
-          <table className="mt-4 w-full min-w-[680px] text-left text-sm">
+          <ul className="mt-4 space-y-2 md:hidden">
+            {rows.map(([metric, metricStatus, value, source, detail]) => (
+              <li key={String(metric)} className="border border-line p-3 text-sm">
+                <p className="font-medium">{metric}</p>
+                <p className="mt-1 capitalize text-mute">{metricStatus}</p>
+                <p className="mt-2 font-display text-2xl">{metricLabel(String(metricStatus), value as number | null)}</p>
+                <p className="mt-2 break-words text-mute">{source}</p>
+                <p className="break-words text-mute">{detail}</p>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-4 hidden overflow-x-auto md:block">
+          <table className="w-full min-w-[680px] text-left text-sm">
             <thead className="text-mute">
               <tr>
                 <th className="py-2 font-medium">Metric</th>
@@ -177,15 +194,26 @@ export function PtsResults({
               ))}
             </tbody>
           </table>
+          </div>
         </section>
       ) : null}
 
-      <section className="rounded-3xl border border-line bg-panel p-5">
+      <section className="min-w-0 rounded-none border border-line bg-panel p-4 sm:p-5">
         <h2 className="font-display text-xl">Callouts in this snapshot</h2>
         {callouts.length === 0 ? (
           <p className="mt-3 text-sm text-mute">No individual Callout rows were stored for this snapshot.</p>
         ) : (
-          <div className="mt-3 overflow-x-auto">
+          <>
+          <ul className="mt-3 space-y-2 md:hidden">
+            {callouts.slice(0, 50).map((callout) => (
+              <li key={callout.calloutId} className="border border-line p-3 text-sm">
+                <p className="break-all font-medium">{callout.calloutId}</p>
+                <p className="mt-2 text-mute">Likes {formatNumber(callout.likes)} · Reposts {formatNumber(callout.repostCount)}</p>
+                <p className="text-mute">{formatWhen(callout.createdAt)}</p>
+              </li>
+            ))}
+          </ul>
+          <div className="mt-3 hidden overflow-x-auto md:block">
             <table className="w-full min-w-[640px] text-left text-sm">
               <thead className="text-mute">
                 <tr>
@@ -208,6 +236,8 @@ export function PtsResults({
             </table>
             {callouts.length > 50 ? <p className="mt-2 text-sm text-mute">Showing 50 of {callouts.length} rows.</p> : null}
           </div>
+          {callouts.length > 50 ? <p className="mt-2 text-sm text-mute md:hidden">Showing 50 of {callouts.length} rows.</p> : null}
+          </>
         )}
       </section>
 
