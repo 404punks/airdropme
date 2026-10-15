@@ -11,7 +11,7 @@ export default async function HomePage() {
   return (
     <div className="space-y-4 sm:space-y-6">
       <section id="check" className="border border-line bg-panel p-4 sm:p-6">
-        <p className="text-xs font-medium text-blue">Ansemmas PTS</p>
+        <p className="text-xs font-medium text-blue">Callout Drop</p>
         <h1 className="mt-2 font-display text-3xl font-semibold leading-tight sm:text-4xl">Check Your PTS</h1>
         <p className="mt-4 max-w-2xl text-base text-mute sm:text-lg">
           Check your points and airdrop eligibility using your Pump.fun username or wallet address.

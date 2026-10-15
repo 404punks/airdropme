@@ -115,7 +115,7 @@ export async function pumpGet(options: {
       const headers: Record<string, string> = {
         Accept: "application/json",
         Origin: "https://pump.fun",
-        "User-Agent": "Mozilla/5.0 (compatible; airdropme/1.0; +https://pump.fun)",
+        "User-Agent": "Mozilla/5.0 (compatible; CalloutDrop/1.0; +https://pump.fun)",
       };
       if (options.token) headers.Authorization = `Bearer ${options.token}`;
       const response = options.fetchImpl

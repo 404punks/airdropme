@@ -1,4 +1,4 @@
-# AirdropMe
+# Callout Drop
 
 Public Pump.fun statistics, a PTS score, and Solana claim registration when claiming is open.
 
