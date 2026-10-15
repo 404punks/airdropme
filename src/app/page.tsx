@@ -1,9 +1,13 @@
+import { cookies } from "next/headers";
 import { CheckForm } from "@/components/check-form";
 import { explainFormula } from "@/server/points/calculate";
 import { getStore } from "@/server/db";
+import { referrerFromCookieHeader } from "@/server/referrals/cookie";
 
 export default async function HomePage() {
   const settings = await getStore().getSettings();
+  const jar = await cookies();
+  const invitedBy = referrerFromCookieHeader(jar.getAll().map((item) => `${item.name}=${item.value}`).join("; ")) ?? "";
   return (
     <div className="space-y-4 sm:space-y-6">
       <section id="check" className="border border-line bg-panel p-4 sm:p-6">
@@ -13,7 +17,7 @@ export default async function HomePage() {
           Check your points and airdrop eligibility using your Pump.fun username or wallet address.
         </p>
         <div className="mt-5">
-          <CheckForm />
+          <CheckForm invitedBy={invitedBy} />
         </div>
       </section>
 

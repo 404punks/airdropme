@@ -31,6 +31,27 @@ const FIXTURES: Record<string, FetchOutcome> = {
     dataMode: "demo",
     failures: [],
   },
+  demobeta: {
+    profile: {
+      pumpUserId: "00000000-0000-4000-8000-0000000000b2",
+      username: "DEMO_beta",
+      canonicalWallet: "DemoWalletBeta1111111111111111111111111111",
+      profileImage: null,
+      bio: "Labeled demo fixture. Not a Pump.fun account.",
+      banned: false,
+      kind: "person",
+    },
+    metrics: {
+      followers: { status: "demo", value: 10, source: "demo fixture", detail: "DEMO data, not a live Pump.fun response." },
+      callouts: { status: "demo", value: 1, source: "demo fixture", detail: "DEMO data, not a live Pump.fun response." },
+      likes: { status: "demo", value: 2, source: "demo fixture", detail: "DEMO data, not a live Pump.fun response." },
+      reposts: { status: "demo", value: 1, source: "demo fixture", detail: "DEMO data, not a live Pump.fun response." },
+    },
+    callouts: [],
+    upstreamComputedAt: null,
+    dataMode: "demo",
+    failures: [],
+  },
 };
 
 export const demoProvider: StatsProvider = {
@@ -39,7 +60,7 @@ export const demoProvider: StatsProvider = {
     const key = lookup.toLowerCase();
     const fixture = FIXTURES[key] ?? FIXTURES[key.replaceAll("_", "")];
     if (!fixture) {
-      throw new ProfileNotFoundError("Demo mode only recognizes the fixture username DEMO_alpha.");
+      throw new ProfileNotFoundError("Demo mode only recognizes the fixture usernames DEMO_alpha and DEMO_beta.");
     }
     return structuredClone(fixture);
   },

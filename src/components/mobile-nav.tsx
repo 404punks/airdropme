@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Gift, House, Info, Search } from "lucide-react";
+import { Gift, House, Info, Search, Users } from "lucide-react";
 
 const items = [
   { href: "/", label: "Home", icon: House, match: (path: string) => path === "/" },
   { href: "/#check", label: "Check", icon: Search, match: (path: string) => path === "/submit" || path.startsWith("/p/") },
+  { href: "/referrals", label: "Refer", icon: Users, match: (path: string) => path.startsWith("/referrals") || path.startsWith("/r/") },
   { href: "/claim", label: "Claim", icon: Gift, match: (path: string) => path.startsWith("/claim") },
   { href: "/how-it-works", label: "Guide", icon: Info, match: (path: string) => path.startsWith("/how-it-works") },
 ];
@@ -19,7 +20,7 @@ export function MobileNav() {
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       aria-label="Primary"
     >
-      <ul className="grid grid-cols-4">
+      <ul className="grid grid-cols-5">
         {items.map((item) => {
           const active = item.match(pathname);
           const Icon = item.icon;

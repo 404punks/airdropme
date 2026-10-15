@@ -3,6 +3,7 @@ import { config } from "@/server/config";
 import type { ClaimRecord, Repository } from "@/server/db/types";
 import { isSolanaAddress } from "@/server/validation/identifier";
 import { buildClaimMessage, createNonce, verifyWalletSignature } from "@/server/security/signature";
+import { getReferralRepository, summaryFor } from "@/server/referrals/service";
 import { ServiceError } from "@/server/services/profiles";
 
 export interface Distributor {
@@ -20,6 +21,18 @@ export const unconfiguredDistributor: Distributor = {
     };
   },
 };
+
+async function referralBonus(username: string | null): Promise<number> {
+  if (!username) return 0;
+  const store = getReferralRepository();
+  if (!store) return 0;
+  try {
+    const history = await store.listHistory();
+    return summaryFor(username, history).points;
+  } catch {
+    return 0;
+  }
+}
 
 export function resolveDistributor(): Distributor {
   if (!config.distributionEnabled) return unconfiguredDistributor;
@@ -105,7 +118,8 @@ export async function registerClaim(options: {
   if (user.flagged || user.banned) {
     throw new ServiceError("This profile is not eligible.", "validation", 403);
   }
-  if (user.currentPoints < campaign.minPoints) {
+  const points = user.currentPoints + (await referralBonus(user.username));
+  if (points < campaign.minPoints) {
     throw new ServiceError("This profile does not meet the points requirement.", "validation", 403);
   }
   if (user.canonicalWallet !== options.wallet) {
@@ -130,7 +144,7 @@ export async function registerClaim(options: {
     userId: user.id,
     wallet: options.wallet,
     status: "registered",
-    pointsAtClaim: user.currentPoints,
+    pointsAtClaim: points,
     walletSignature: options.signature,
     txSignature: null,
     failureReason: null,

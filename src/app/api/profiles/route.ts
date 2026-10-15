@@ -3,6 +3,8 @@ import { getStore } from "@/server/db";
 import { errorResponse, readJson } from "@/server/http";
 import { clientIp } from "@/server/security/ip";
 import { getProvider } from "@/server/pumpfun";
+import { referrerFromCookieHeader } from "@/server/referrals/cookie";
+import { originFromHeaders } from "@/server/referrals/logic";
 import { publicProfileKey, submitProfile } from "@/server/services/profiles";
 
 export async function POST(request: Request) {
@@ -14,6 +16,8 @@ export async function POST(request: Request) {
       provider: getProvider(),
       raw: identifier,
       ip: clientIp(request),
+      referrerUsername: referrerFromCookieHeader(request.headers.get("cookie")),
+      origin: originFromHeaders(request.headers),
     });
     return NextResponse.json({
       userId: view.user.id,
