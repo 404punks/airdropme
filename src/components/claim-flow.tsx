@@ -96,7 +96,7 @@ function ClaimInner({ rpcUrl, distributionEnabled }: { rpcUrl: string; distribut
       <p className="text-sm text-mute">Connect your Solana wallet to continue. Expected network: {network}.</p>
       {wallet && connected ? null : <WalletMultiButton />}
       {connected && publicKey ? (
-        <div className="rounded-2xl border border-line bg-ink/60 p-4 text-sm">
+        <div className="rounded-none border border-line bg-ink/60 p-4 text-sm">
           <p className="text-acid">Wallet connected successfully.</p>
           <p className="mt-2">
             <CopyAddress address={publicKey.toBase58()} />
@@ -110,7 +110,7 @@ function ClaimInner({ rpcUrl, distributionEnabled }: { rpcUrl: string; distribut
         <p className="text-sm text-mute">Phantom and Solflare are supported.</p>
       )}
       {!distributionEnabled ? (
-        <p className="rounded-2xl border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-warn">
+        <p className="rounded-none border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-warn">
           Token distribution is not active. A signature only registers a claim request. It does not send tokens.
         </p>
       ) : null}
@@ -130,7 +130,7 @@ function ClaimInner({ rpcUrl, distributionEnabled }: { rpcUrl: string; distribut
           Review Claim
         </Button>
       ) : (
-        <div className="space-y-3 rounded-2xl border border-line bg-navy p-4 text-sm">
+        <div className="space-y-3 rounded-none border border-line bg-navy p-4 text-sm">
           <p>Review the destination wallet {publicKey ? shortKey(publicKey.toBase58()) : ""} before you approve a signature.</p>
           <p className="text-mute">No claim amount is shown because the backend has not confirmed a token payment.</p>
           <div className="flex flex-wrap gap-3">
@@ -149,7 +149,7 @@ function ClaimInner({ rpcUrl, distributionEnabled }: { rpcUrl: string; distribut
         </p>
       ) : null}
       {result ? (
-        <div className="rounded-2xl border border-line bg-ink/50 p-4 text-sm">
+        <div className="rounded-none border border-line bg-ink/50 p-4 text-sm">
           <p className="font-medium text-mist">{result}</p>
           <p className="mt-2 text-mute">Status: {status || "registered"}. This record is not a completed token transfer unless a transaction signature is shown.</p>
           {tx ? (

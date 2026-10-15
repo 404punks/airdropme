@@ -24,7 +24,7 @@ export default async function AdminLoginPage() {
     <div className="mx-auto max-w-md space-y-4">
       <h1 className="font-display text-4xl">Admin</h1>
       {config.adminEnabled ? (
-        <form action={login} className="space-y-3 rounded-3xl border border-line bg-panel p-5">
+        <form action={login} className="space-y-3 rounded-none border border-line bg-panel p-5">
           <label className="block text-sm" htmlFor="email">
             Email
             <Input className="mt-1" id="email" name="email" type="email" autoComplete="username" required />

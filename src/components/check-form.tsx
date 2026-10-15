@@ -66,7 +66,7 @@ export function CheckForm() {
           aria-describedby="identifier-help"
           aria-invalid={error ? true : undefined}
         />
-        <Button type="submit" disabled={pending} className="sm:min-w-44">
+        <Button type="submit" disabled={pending} className="w-full sm:w-auto sm:min-w-44">
           {pending ? "Checking…" : "Check Eligibility"}
         </Button>
       </div>
@@ -74,7 +74,7 @@ export function CheckForm() {
         Enter a public username or wallet address to view your available points and eligibility status.
       </p>
       {error ? (
-        <p role="alert" className="rounded-2xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
+        <p role="alert" className="rounded-none border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
           {error}
         </p>
       ) : null}

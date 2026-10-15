@@ -21,16 +21,31 @@ export function PointsChart({ components }: { components: PointComponent[] }) {
                 <span>{item.label}</span>
                 <span className="tabular-nums text-mute">{item.included ? `${formatNumber(item.points)} PTS` : item.status}</span>
               </div>
-              <div className="h-2.5 overflow-hidden rounded-full bg-ink">
-                <div className={`h-full rounded-full ${barColor[item.key]}`} style={{ width: `${width}%` }} />
+              <div className="h-2 overflow-hidden bg-ink">
+                <div className={`h-full ${barColor[item.key]}`} style={{ width: `${width}%` }} />
               </div>
               <p className="mt-1 text-xs text-mute">{item.reason}</p>
             </div>
           );
         })}
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[520px] text-left text-sm">
+      <ul className="space-y-2 md:hidden">
+        {components.map((item) => (
+          <li key={item.key} className="grid grid-cols-2 gap-x-3 gap-y-1 border border-line p-3 text-sm">
+            <p className="col-span-2 font-medium">{item.label}</p>
+            <p className="text-mute">Status</p>
+            <p className="text-right capitalize">{item.status}</p>
+            <p className="text-mute">Counted</p>
+            <p className="text-right tabular-nums">{item.included ? formatNumber(item.counted) : "—"}</p>
+            <p className="text-mute">Weight</p>
+            <p className="text-right tabular-nums">{item.weight}</p>
+            <p className="text-mute">PTS</p>
+            <p className="text-right tabular-nums">{item.included ? formatNumber(item.points) : "0"}</p>
+          </li>
+        ))}
+      </ul>
+      <div className="hidden overflow-x-auto md:block">
+        <table className="w-full text-left text-sm">
           <caption className="sr-only">Point values for each public statistic</caption>
           <thead className="text-mute">
             <tr>

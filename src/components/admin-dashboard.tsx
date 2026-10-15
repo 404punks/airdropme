@@ -66,14 +66,14 @@ export function AdminDashboard({ data }: { data: AdminData }) {
           ["Claims", data.counts.claims],
           ["Fetch failures", data.counts.failures],
         ].map(([label, value]) => (
-          <article key={String(label)} className="rounded-3xl border border-line bg-panel p-4">
+          <article key={String(label)} className="rounded-none border border-line bg-panel p-4">
             <p className="text-sm text-mute">{label}</p>
             <p className="font-display text-3xl">{value}</p>
           </article>
         ))}
       </section>
 
-      <section className="rounded-3xl border border-line bg-panel p-5">
+      <section className="rounded-none border border-line bg-panel p-5">
         <h2 className="font-display text-2xl">API health</h2>
         <dl className="mt-4 grid gap-3 text-sm md:grid-cols-2">
           <div>Data mode: {data.health.dataMode}</div>
@@ -87,7 +87,7 @@ export function AdminDashboard({ data }: { data: AdminData }) {
         </dl>
       </section>
 
-      <section className="rounded-3xl border border-line bg-panel p-5">
+      <section className="rounded-none border border-line bg-panel p-5">
         <h2 className="font-display text-2xl">Scoring weights</h2>
         <p className="mt-2 text-sm text-mute">Formula version {settings.formulaVersion}. Saving a change increments the version.</p>
         <div className="mt-4 grid gap-3 md:grid-cols-2">
@@ -126,7 +126,7 @@ export function AdminDashboard({ data }: { data: AdminData }) {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-line bg-panel p-5">
+      <section className="rounded-none border border-line bg-panel p-5">
         <h2 className="font-display text-2xl">Campaign</h2>
         <div className="mt-4 grid gap-3 md:grid-cols-2">
           <label className="text-sm">
@@ -136,7 +136,7 @@ export function AdminDashboard({ data }: { data: AdminData }) {
           <label className="text-sm">
             Status
             <select
-              className="mt-1 h-12 w-full rounded-2xl border border-line bg-ink px-3"
+              className="mt-1 h-12 w-full rounded-none border border-line bg-ink px-3"
               value={campaign.status}
               onChange={(event) => setCampaign({ ...campaign, status: event.target.value as CampaignRecord["status"] })}
             >
@@ -186,7 +186,7 @@ export function AdminDashboard({ data }: { data: AdminData }) {
           <label className="text-sm md:col-span-2">
             Description
             <textarea
-              className="mt-1 min-h-28 w-full rounded-2xl border border-line bg-ink px-4 py-3 text-sm"
+              className="mt-1 min-h-28 w-full rounded-none border border-line bg-ink px-4 py-3 text-sm"
               value={campaign.description}
               onChange={(event) => setCampaign({ ...campaign, description: event.target.value })}
             />
@@ -197,7 +197,7 @@ export function AdminDashboard({ data }: { data: AdminData }) {
         </Button>
       </section>
 
-      <section className="rounded-3xl border border-line bg-panel p-5">
+      <section className="rounded-none border border-line bg-panel p-5">
         <div className="flex items-center justify-between gap-3">
           <h2 className="font-display text-2xl">Profiles</h2>
           <a className="text-sm text-acid" href="/api/admin/export">
@@ -251,11 +251,11 @@ export function AdminDashboard({ data }: { data: AdminData }) {
         </div>
       </section>
 
-      <section className="rounded-3xl border border-line bg-panel p-5">
+      <section className="rounded-none border border-line bg-panel p-5">
         <h2 className="font-display text-2xl">Failed fetches</h2>
         <ul className="mt-3 space-y-2 text-sm">
           {data.failures.map((failure) => (
-            <li key={failure.id} className="rounded-2xl bg-ink/40 px-3 py-2">
+            <li key={failure.id} className="rounded-none bg-ink/40 px-3 py-2">
               {failure.endpoint} · {failure.statusCode ?? "network"} · {failure.message}
             </li>
           ))}
@@ -263,7 +263,7 @@ export function AdminDashboard({ data }: { data: AdminData }) {
         </ul>
       </section>
 
-      <section className="rounded-3xl border border-line bg-panel p-5">
+      <section className="rounded-none border border-line bg-panel p-5">
         <h2 className="font-display text-2xl">Claims</h2>
         <ul className="mt-3 space-y-2 text-sm">
           {data.claims.map((claim) => (
@@ -277,7 +277,7 @@ export function AdminDashboard({ data }: { data: AdminData }) {
         </ul>
       </section>
 
-      <section className="rounded-3xl border border-line bg-panel p-5">
+      <section className="rounded-none border border-line bg-panel p-5">
         <h2 className="font-display text-2xl">Audit log</h2>
         <ul className="mt-3 space-y-2 text-sm text-mute">
           {data.audit.map((row) => (

@@ -1,4 +1,5 @@
 import { ClaimClient } from "@/components/claim-client";
+import { InactiveClaimButton } from "@/components/inactive-claim-button";
 import { config } from "@/server/config";
 import { getStore } from "@/server/db";
 
@@ -19,15 +20,16 @@ export default async function ClaimPage() {
       : null;
 
   return (
-    <div className="space-y-8">
-      <section className="rounded-3xl border border-line bg-panel p-5 shadow-card sm:p-8">
+    <div className="space-y-3 sm:space-y-4">
+      <section className="border border-line bg-panel p-4 sm:p-6">
         <p className="text-sm font-medium text-blue">Airdrop</p>
-        <h1 className="mt-3 font-display text-4xl font-semibold">Claim Your Airdrop</h1>
+        <h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">Claim Your Airdrop</h1>
         <p className="mt-4 max-w-2xl text-mute">
           Check your eligibility, connect your Solana wallet, and follow the instructions to claim your rewards when
           claiming is available.
         </p>
-        <div className="mt-6 rounded-2xl border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-warn">
+        <InactiveClaimButton className="mt-6" />
+        <div className="mt-4 border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-warn">
           {claimOpen
             ? "Claiming is open. Token distribution still depends on a configured distributor."
             : "Claim coming soon. Wallet connection and claim submission stay closed until the campaign is open."}
@@ -36,14 +38,14 @@ export default async function ClaimPage() {
 
       <ol className="space-y-3">
         {steps.map(([title, copy]) => (
-          <li key={title} className="rounded-3xl border border-line bg-navy p-5">
+          <li key={title} className="rounded-none border border-line bg-navy p-5">
             <h2 className="font-display text-lg">{title}</h2>
             <p className="mt-2 text-sm leading-6 text-mute">{copy}</p>
           </li>
         ))}
       </ol>
 
-      <section className="rounded-3xl border border-line bg-panel p-5">
+      <section className="rounded-none border border-line bg-panel p-5">
         <h2 className="font-display text-xl">Claim details</h2>
         {allocation ? (
           <p className="mt-3 text-sm text-mute">
