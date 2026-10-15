@@ -6,6 +6,7 @@ import { getStore } from "@/server/db";
 const links = [
   ["Home", "/"],
   ["Check Your PTS", "/#check"],
+  ["Referrals", "/referrals"],
   ["Airdrop Claim", "/claim"],
   ["How It Works", "/how-it-works"],
 ];
@@ -16,7 +17,8 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     <div className="mx-auto flex min-h-screen max-w-5xl flex-col">
       <header className="sticky top-0 z-20 border-b border-line bg-ink/95 pt-[env(safe-area-inset-top)] backdrop-blur">
         <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          <Link href="/" className="font-display text-base font-semibold tracking-tight">
+          <Link href="/" className="flex items-center gap-2 font-display text-base font-semibold tracking-tight">
+            <img src="/logo.png" alt="" className="h-8 w-8 invert" />
             Ansemmas <span className="text-blue">PTS</span>
           </Link>
           <nav className="hidden gap-5 text-sm text-mute md:flex" aria-label="Primary">
@@ -44,6 +46,9 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             <p>This server is not using a shared database. Profile checks still use public Pump.fun data.</p>
           ) : null}
           <p className="flex flex-wrap gap-4">
+            <Link className="hover:text-white" href="/referrals">
+              Referrals
+            </Link>
             <Link className="hover:text-white" href="/how-it-works">
               How it works
             </Link>

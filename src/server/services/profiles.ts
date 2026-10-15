@@ -5,6 +5,8 @@ import { calculatePoints, type PointsBreakdown, type ScoringSettings } from "@/s
 import { NotPumpProfileError, ProfileNotFoundError, type FetchOutcome, type StatsProvider } from "@/server/pumpfun/types";
 import { hashIp } from "@/server/security/ip";
 import { rateLimit } from "@/server/security/rate-limit";
+import { referralUrl } from "@/server/referrals/logic";
+import { applyReferral, getReferralRepository, publishReferralLink } from "@/server/referrals/service";
 import { parseIdentifier } from "@/server/validation/identifier";
 
 export { profilePath, publicProfileKey };
@@ -57,7 +59,7 @@ async function findStoredUser(repo: Repository, id: string): Promise<UserRecord 
 export async function viewProfile(
   repo: Repository,
   id: string,
-  options?: { provider?: StatsProvider; ip?: string },
+  options?: { provider?: StatsProvider; ip?: string; referrerUsername?: string | null; origin?: string },
 ): Promise<ProfileView> {
   const user = await findStoredUser(repo, id);
   if (!user) {
@@ -82,6 +84,8 @@ export async function viewProfile(
       raw: id,
       ip,
       skipRateLimit: true,
+      referrerUsername: options.referrerUsername,
+      origin: options.origin,
     });
   }
   const snapshot = await repo.latestSnapshot(user.id);
@@ -119,6 +123,8 @@ export async function submitProfile(options: {
   ip: string;
   force?: boolean;
   skipRateLimit?: boolean;
+  referrerUsername?: string | null;
+  origin?: string;
 }): Promise<ProfileView> {
   const parsed = parseIdentifier(options.raw);
   if (!parsed.ok) throw new ServiceError(parsed.error, "validation", 400);
@@ -145,10 +151,18 @@ export async function submitProfile(options: {
     const age = Date.now() - new Date(existing.lastFetchedAt).getTime();
     if (age < config.MIN_REFRESH_SECONDS * 1000) {
       const view = await viewProfile(options.repo, existing.id);
+      const referralNote = await rememberReferral({
+        referrerUsername: options.referrerUsername,
+        referredUsername: existing.username,
+        referredImage: existing.profileImage,
+        createdAt: existing.createdAt,
+        origin: options.origin ?? "https://www.ansemmasx.fun",
+      });
+      const message = "This profile is already registered. Showing the latest stored snapshot.";
       return {
         ...view,
         created: false,
-        message: "This profile is already registered. Showing the latest stored snapshot.",
+        message: referralNote ? `${message} ${referralNote}` : message,
       };
     }
   }
@@ -222,11 +236,64 @@ export async function submitProfile(options: {
     );
   }
   const view = await viewProfile(options.repo, saved.user.id);
+  const referralNote = await rememberReferral({
+    referrerUsername: options.referrerUsername,
+    referredUsername: saved.user.username,
+    referredImage: saved.user.profileImage,
+    createdAt: saved.user.createdAt,
+    origin: options.origin ?? "https://www.ansemmasx.fun",
+  });
+  const base = saved.created ? "Profile registered from public Pump.fun data." : "Stored snapshot refreshed.";
   return {
     ...view,
     created: saved.created,
-    message: saved.created ? "Profile registered from public Pump.fun data." : "Stored snapshot refreshed.",
+    message: referralNote ? `${base} ${referralNote}` : base,
   };
+}
+
+async function rememberReferral(input: {
+  referrerUsername?: string | null;
+  referredUsername: string | null;
+  referredImage: string | null;
+  createdAt: string;
+  origin: string;
+}): Promise<string> {
+  const store = getReferralRepository();
+  let note = "";
+  if (input.referredUsername && store) {
+    try {
+      await publishReferralLink(store, {
+        username: input.referredUsername,
+        profileImage: input.referredImage,
+        origin: input.origin,
+      });
+    } catch {
+      note = "Your referral link could not be saved to Firebase. Nothing was deleted.";
+    }
+  }
+  if (!input.referrerUsername || !input.referredUsername) return note;
+  if (!store) return "Referral points were not saved because Firebase is not configured.";
+  try {
+    const grant = await applyReferral(store, {
+      referrerUsername: input.referrerUsername,
+      referredUsername: input.referredUsername,
+      referredImage: input.referredImage,
+      origin: input.origin,
+      createdAt: input.createdAt,
+    });
+    if (grant.status === "recorded") {
+      return "You joined from a referral link. You and your referrer each received 170 PTS. This referral is stored in Firebase and is not deleted.";
+    }
+    if (grant.status === "rejected" && grant.reason) return grant.reason;
+    return note;
+  } catch {
+    return "Your referral could not be saved to Firebase. The profile check is still complete, and no referral history was deleted.";
+  }
+}
+
+export function profileReferralLink(username: string | null, origin: string): string | null {
+  if (!username) return null;
+  return referralUrl(origin, username);
 }
 
 export type { ScoringSettings };

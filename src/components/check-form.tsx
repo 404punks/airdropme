@@ -10,7 +10,7 @@ const INVALID = "Enter a Pump.fun username or a valid Solana wallet address.";
 const MISSING = "We couldn't find this profile. Please check the username and try again.";
 const UNAVAILABLE = "Unable to retrieve your points right now. Please try again.";
 
-export function CheckForm() {
+export function CheckForm({ invitedBy = "" }: { invitedBy?: string }) {
   const router = useRouter();
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
@@ -73,6 +73,11 @@ export function CheckForm() {
       <p id="identifier-help" className="text-sm text-mute">
         Enter a public username or wallet address to view your available points and eligibility status.
       </p>
+      {invitedBy ? (
+        <p className="border border-blue/30 bg-blue/10 px-4 py-3 text-sm text-mist">
+          {invitedBy} invited you. When this account joins, you both receive 170 PTS.
+        </p>
+      ) : null}
       {error ? (
         <p role="alert" className="rounded-none border border-danger/40 bg-danger/10 px-4 py-3 text-sm text-danger">
           {error}
