@@ -18,7 +18,7 @@ export default async function HowItWorksPage() {
       <div>
         <h1 className="font-display text-3xl font-semibold sm:text-4xl">How It Works</h1>
         <p className="mt-4 max-w-2xl text-mute">
-          Ansemmas PTS reads public Pump.fun statistics, calculates a score, and will open claiming only when the
+          Callout Drop reads public Pump.fun statistics, calculates a score, and will open claiming only when the
           campaign is actually ready.
         </p>
       </div>
