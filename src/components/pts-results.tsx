@@ -4,6 +4,7 @@ import { InactiveClaimButton } from "@/components/inactive-claim-button";
 import { PointsChart } from "@/components/points-chart";
 import { ReferralPanel } from "@/components/referral-panel";
 import { RefreshButton } from "@/components/refresh-button";
+import { UsdcAmount, UsdcInline } from "@/components/usdc-amount";
 import { Badge } from "@/components/ui/badge";
 import { qualification } from "@/lib/eligibility";
 import { profileNotice } from "@/lib/notices";
@@ -117,12 +118,12 @@ export function PtsResults({
 
       <section className="grid gap-3 lg:grid-cols-[0.9fr_1.1fr]">
         <article className="min-w-0 border border-line border-t-2 border-t-blue bg-panel p-4 sm:p-5">
-          <p className="text-xs uppercase tracking-[0.16em] text-mute">Total PTS</p>
-          <p className="mt-3 font-display text-6xl leading-none tabular-nums text-mist">{formatNumber(totalPoints)}</p>
+          <p className="text-xs uppercase tracking-[0.16em] text-mute">Total</p>
+          <p className="mt-3 font-display text-4xl leading-none text-mist sm:text-5xl">
+            <UsdcAmount points={user.currentPoints} markClassName="h-6 w-6" />
+          </p>
           {referralPoints > 0 ? (
-            <p className="mt-3 text-sm text-mute">
-              {formatNumber(user.currentPoints)} from Pump.fun and {formatNumber(referralPoints)} from referrals.
-            </p>
+            <p className="mt-3 text-sm text-mute">{formatNumber(referralPoints)} referral PTS stay separate from this USDC total.</p>
           ) : null}
           <div className="mt-4">
             {status.status === "unavailable" ? (
@@ -152,7 +153,7 @@ export function PtsResults({
           <InactiveClaimButton className="mt-5" />
         </article>
         <article className="min-w-0 border border-line bg-panel p-4 sm:p-5">
-          <h2 className="font-display text-xl">PTS breakdown</h2>
+          <h2 className="font-display text-xl"><UsdcInline text="USDC breakdown" /></h2>
           <div className="mt-4">
             {snapshot ? <PointsChart components={snapshot.pointsBreakdown.components} /> : <p className="text-sm text-mute">No points data is currently available for this account.</p>}
           </div>

@@ -132,15 +132,23 @@ export function calculatePoints(
   };
 }
 
+export function usdcFromPoints(points: number): number {
+  return points / 100;
+}
+
+export function formatUsdc(points: number): string {
+  return usdcFromPoints(points).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 export function explainFormula(settings: ScoringSettings): string[] {
   return [
-    `${settings.pointsPerFollower} point per verified follower`,
-    `${settings.pointsPerCallout} points per verified Callout created`,
-    `${settings.pointsPerLike} point per verified like received`,
-    `${settings.pointsPerRepost} points per verified repost received`,
+    `$${formatUsdc(settings.pointsPerFollower)} USDC per verified follower`,
+    `$${formatUsdc(settings.pointsPerCallout)} USDC per verified Callout created`,
+    `$${formatUsdc(settings.pointsPerLike)} USDC per verified like received`,
+    `$${formatUsdc(settings.pointsPerRepost)} USDC per verified repost received`,
     "Unavailable or incomplete statistics are not scored.",
-    "The score is recomputed from current cumulative public totals. A refresh replaces the score. It does not add the same totals again.",
-    "PTS score public statistics. They are not a promise of tokens, price, or a completed airdrop.",
+    "The total is recomputed from current cumulative public totals. A refresh replaces it. It does not add the same totals again.",
+    "USDC amounts score public statistics. They are not a completed payment.",
   ];
 }
 
