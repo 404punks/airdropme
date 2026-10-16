@@ -5,7 +5,7 @@ import { calculatePoints, type PointsBreakdown, type ScoringSettings } from "@/s
 import { NotPumpProfileError, ProfileNotFoundError, type FetchOutcome, type StatsProvider } from "@/server/pumpfun/types";
 import { hashIp } from "@/server/security/ip";
 import { rateLimit } from "@/server/security/rate-limit";
-import { referralUrl } from "@/server/referrals/logic";
+import { DEFAULT_SITE_ORIGIN, referralUrl } from "@/server/referrals/logic";
 import { applyReferral, getReferralRepository, publishReferralLink } from "@/server/referrals/service";
 import { parseIdentifier } from "@/server/validation/identifier";
 
@@ -156,7 +156,7 @@ export async function submitProfile(options: {
         referredUsername: existing.username,
         referredImage: existing.profileImage,
         createdAt: existing.createdAt,
-        origin: options.origin ?? "https://www.ansemmasx.fun",
+        origin: options.origin ?? DEFAULT_SITE_ORIGIN,
       });
       const message = "This profile is already registered. Showing the latest stored snapshot.";
       return {
@@ -241,7 +241,7 @@ export async function submitProfile(options: {
     referredUsername: saved.user.username,
     referredImage: saved.user.profileImage,
     createdAt: saved.user.createdAt,
-    origin: options.origin ?? "https://www.ansemmasx.fun",
+    origin: options.origin ?? DEFAULT_SITE_ORIGIN,
   });
   const base = saved.created ? "Profile registered from public Pump.fun data." : "Stored snapshot refreshed.";
   return {

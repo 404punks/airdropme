@@ -1,7 +1,7 @@
 export const REFERRAL_POINTS = 170;
 export const REFERRAL_LEADERBOARD_LIMIT = 100;
 export const REFERRAL_ATTACH_WINDOW_MS = 15 * 60 * 1000;
-export const DEFAULT_SITE_ORIGIN = "https://www.ansemmasx.fun";
+export const DEFAULT_SITE_ORIGIN = "https://www.calloutdrop.app";
 
 export interface ReferralHistoryRecord {
   id: string;
@@ -55,11 +55,17 @@ export function originFromHeaders(
   return siteOriginFromHost(host, configured);
 }
 
-export function siteOriginFromHost(host: string | null, configured = ""): string {
+export function siteOriginFromHost(_host: string | null, configured = ""): string {
   const explicit = configured.trim().replace(/\/$/, "");
-  if (explicit) return explicit;
-  if (host && /^(localhost|127\.0\.0\.1)(:\d+)?$/.test(host)) return `http://${host}`;
-  if (host && /(^|\.)ansemmasx\.fun(:\d+)?$/.test(host)) return `https://${host.replace(/:\d+$/, "")}`;
+  if (explicit) {
+    try {
+      const url = new URL(explicit);
+      const legacy = url.hostname === "ansemmasx.fun" || url.hostname.endsWith(".ansemmasx.fun");
+      if (!legacy && (url.protocol === "https:" || url.protocol === "http:")) return explicit;
+    } catch {
+      return DEFAULT_SITE_ORIGIN;
+    }
+  }
   return DEFAULT_SITE_ORIGIN;
 }
 

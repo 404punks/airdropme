@@ -57,7 +57,7 @@ export default async function ProfilePage({
   }
   const campaign = await getStore().getCampaign();
   const referral = {
-    link: profileReferralLink(view.user.username, origin),
+    link: view.user.username && view.user.canonicalWallet ? profileReferralLink(view.user.username, origin) : null,
     points: 0,
     made: 0,
     joined: 0,
@@ -65,8 +65,8 @@ export default async function ProfilePage({
     unavailable: false,
   };
   const referrals = getReferralRepository();
-  if (!referrals) referral.unavailable = Boolean(view.user.username);
-  else if (view.user.username) {
+  if (!referrals) referral.unavailable = Boolean(view.user.username && view.user.canonicalWallet);
+  else if (view.user.username && view.user.canonicalWallet) {
     try {
       await publishReferralLink(referrals, {
         username: view.user.username,

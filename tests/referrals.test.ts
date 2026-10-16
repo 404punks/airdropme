@@ -16,14 +16,17 @@ import {
 import { MemoryReferralStore } from "@/server/referrals/memory";
 import { applyReferral } from "@/server/referrals/service";
 
-const origin = "https://www.ansemmasx.fun";
+const origin = "https://www.calloutdrop.app";
 
 describe("referral rules", () => {
   it("builds a username link on the site domain", () => {
-    expect(referralUrl(origin, "Chjokka")).toBe("https://www.ansemmasx.fun/r/Chjokka");
+    expect(referralUrl(origin, "Chjokka")).toBe("https://www.calloutdrop.app/r/Chjokka");
     expect(siteOriginFromHost("preview.example.com")).toBe(origin);
-    expect(siteOriginFromHost("www.ansemmasx.fun")).toBe("https://www.ansemmasx.fun");
-    expect(siteOriginFromHost("localhost:3000")).toBe("http://localhost:3000");
+    expect(siteOriginFromHost("www.ansemmasx.fun")).toBe(origin);
+    expect(siteOriginFromHost("localhost:3000")).toBe(origin);
+    expect(siteOriginFromHost("www.calloutdrop.app")).toBe(origin);
+    expect(siteOriginFromHost("localhost:3000", "https://www.ansemmasx.fun")).toBe(origin);
+    expect(siteOriginFromHost("localhost:3000", "https://staging.example.com")).toBe("https://staging.example.com");
   });
 
   it("pays 170 points to both sides once", async () => {
@@ -50,7 +53,7 @@ describe("referral rules", () => {
     expect(store.history[0].referredPoints).toBe(REFERRAL_POINTS);
     expect(pointsFromHistory("DEMO_alpha", store.history).points).toBe(170);
     expect(pointsFromHistory("DEMO_beta", store.history).points).toBe(170);
-    expect(store.links.map((link) => link.link)).toContain("https://www.ansemmasx.fun/r/DEMO_alpha");
+    expect(store.links.map((link) => link.link)).toContain(`${origin}/r/DEMO_alpha`);
   });
 
   it("rejects a self referral and an old account", async () => {
@@ -102,8 +105,8 @@ describe("referral rules", () => {
       [{ username: "Alpha", profileImage: "https://cdn.example/a.png", link: referralUrl(origin, "Alpha"), domain: origin, createdAt: "2026-10-15T00:00:00.000Z" }],
     );
     expect(board.map((row) => [row.username, row.referrals, row.points, row.domain, row.link])).toEqual([
-      ["Alpha", 2, 340, origin, "https://www.ansemmasx.fun/r/Alpha"],
-      ["Zed", 1, 170, origin, "https://www.ansemmasx.fun/r/Zed"],
+      ["Alpha", 2, 340, origin, `${origin}/r/Alpha`],
+      ["Zed", 1, 170, origin, `${origin}/r/Zed`],
     ]);
     expect(board[0].profileImage).toBe("https://cdn.example/a.png");
     expect(board.find((row) => row.username === "Beta")).toBeUndefined();

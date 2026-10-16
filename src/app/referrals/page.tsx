@@ -1,9 +1,7 @@
-import { headers } from "next/headers";
 import Link from "next/link";
 import { CopyLink } from "@/components/copy-link";
-import { ReferralLinkCopy } from "@/components/referral-link-copy";
 import { getReferralRepository, loadReferralState } from "@/server/referrals/service";
-import { originFromHeaders, REFERRAL_POINTS } from "@/server/referrals/logic";
+import { DEFAULT_SITE_ORIGIN, REFERRAL_POINTS } from "@/server/referrals/logic";
 import { formatNumber } from "@/lib/utils";
 
 function safeImage(url: string | null): string | null {
@@ -17,7 +15,6 @@ function safeImage(url: string | null): string | null {
 }
 
 export default async function ReferralsPage() {
-  const origin = originFromHeaders(await headers());
   const store = getReferralRepository();
   let board: Awaited<ReturnType<typeof loadReferralState>>["board"] = [];
   let history: Awaited<ReturnType<typeof loadReferralState>>["history"] = [];
@@ -39,11 +36,9 @@ export default async function ReferralsPage() {
         <p className="text-xs font-medium text-blue">Callout Drop</p>
         <h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">Top 100 referrers</h1>
         <p className="mt-4 max-w-2xl text-mute">
-          A referral link uses this website&apos;s domain and your Pump.fun username. When someone joins from that link, you receive {REFERRAL_POINTS} PTS and they receive {REFERRAL_POINTS} PTS.
+          A referral link is created from your Pump.fun username after your profile and wallet address are connected. It uses {DEFAULT_SITE_ORIGIN}. When someone joins from that link, you receive {REFERRAL_POINTS} PTS and they receive {REFERRAL_POINTS} PTS.
         </p>
       </section>
-
-      <ReferralLinkCopy origin={origin} />
 
       {unavailable ? (
         <p className="border border-warn/30 bg-warn/10 px-4 py-3 text-sm text-warn">

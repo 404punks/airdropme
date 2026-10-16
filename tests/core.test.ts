@@ -11,7 +11,7 @@ import { aggregateCallouts } from "@/server/pumpfun/aggregate";
 import { pumpGet } from "@/server/pumpfun/http";
 import { createLiveProvider } from "@/server/pumpfun/live-provider";
 import { ProfileNotFoundError } from "@/server/pumpfun/types";
-import { calculatePoints, DEFAULT_SETTINGS } from "@/server/points/calculate";
+import { calculatePoints, DEFAULT_SETTINGS, explainFormula, usdcFromPoints } from "@/server/points/calculate";
 import { assertSameOrigin } from "@/server/security/origin";
 import { rateLimit, resetRateLimits } from "@/server/security/rate-limit";
 import { buildClaimMessage, verifyWalletSignature } from "@/server/security/signature";
@@ -86,6 +86,13 @@ describe("points and callouts", () => {
       DEFAULT_SETTINGS,
     );
     expect(breakdown.total).toBe(10 * 1 + 4 * 2);
+    expect(usdcFromPoints(breakdown.total)).toBe(0.18);
+    expect(explainFormula(DEFAULT_SETTINGS).slice(0, 4)).toEqual([
+      "$0.01 USDC per verified follower",
+      "$0.05 USDC per verified Callout created",
+      "$0.01 USDC per verified like received",
+      "$0.02 USDC per verified repost received",
+    ]);
     expect(breakdown.components.find((item) => item.key === "callouts")?.included).toBe(false);
   });
 

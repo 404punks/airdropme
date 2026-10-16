@@ -33,8 +33,10 @@ export function ReferralPanel({
     <section className="border border-line bg-panel p-4 sm:p-5">
       <h2 className="font-display text-xl">Referral</h2>
       <p className="mt-2 text-sm text-mute">Each joined referral gives 170 PTS to you and 170 PTS to the new account. Referral history stays in Firebase.</p>
-      {!username || !link ? (
+      {!username ? (
         <p className="mt-4 text-sm text-mute">Referral links use a Pump.fun username. This profile does not have one yet.</p>
+      ) : !link ? (
+        <p className="mt-4 text-sm text-mute">A referral link is created from this username after the profile address is connected.</p>
       ) : (
         <div className="mt-4">
           <CopyLink link={link} />

@@ -1,3 +1,4 @@
+import { UsdcAmount, UsdcWord } from "@/components/usdc-amount";
 import type { PointComponent } from "@/server/points/calculate";
 import { formatNumber } from "@/lib/utils";
 
@@ -12,14 +13,14 @@ export function PointsChart({ components }: { components: PointComponent[] }) {
   const max = Math.max(1, ...components.map((item) => (item.included ? item.points : 0)));
   return (
     <div className="space-y-5">
-      <div className="space-y-4" role="img" aria-label="Points by category">
+      <div className="space-y-4" role="img" aria-label="USDC by category">
         {components.map((item) => {
           const width = item.included ? (item.points / max) * 100 : 0;
           return (
             <div key={item.key}>
               <div className="mb-1.5 flex items-baseline justify-between gap-3 text-sm">
                 <span>{item.label}</span>
-                <span className="tabular-nums text-mute">{item.included ? `${formatNumber(item.points)} PTS` : item.status}</span>
+                <span className="text-mute">{item.included ? <UsdcAmount points={item.points} /> : item.status}</span>
               </div>
               <div className="h-2 overflow-hidden bg-ink">
                 <div className={`h-full ${barColor[item.key]}`} style={{ width: `${width}%` }} />
@@ -37,10 +38,10 @@ export function PointsChart({ components }: { components: PointComponent[] }) {
             <p className="text-right capitalize">{item.status}</p>
             <p className="text-mute">Counted</p>
             <p className="text-right tabular-nums">{item.included ? formatNumber(item.counted) : "—"}</p>
-            <p className="text-mute">Weight</p>
-            <p className="text-right tabular-nums">{item.weight}</p>
-            <p className="text-mute">PTS</p>
-            <p className="text-right tabular-nums">{item.included ? formatNumber(item.points) : "0"}</p>
+            <p className="text-mute">Rate</p>
+            <p className="text-right"><UsdcAmount points={item.weight} /></p>
+            <p className="text-mute"><UsdcWord /></p>
+            <p className="text-right">{item.included ? <UsdcAmount points={item.points} /> : <UsdcAmount points={0} />}</p>
           </li>
         ))}
       </ul>
@@ -52,8 +53,8 @@ export function PointsChart({ components }: { components: PointComponent[] }) {
               <th className="py-2 font-medium">Category</th>
               <th className="font-medium">Status</th>
               <th className="font-medium">Counted</th>
-              <th className="font-medium">Weight</th>
-              <th className="font-medium">PTS</th>
+              <th className="font-medium">Rate</th>
+              <th className="font-medium"><UsdcWord /></th>
             </tr>
           </thead>
           <tbody>
@@ -62,8 +63,8 @@ export function PointsChart({ components }: { components: PointComponent[] }) {
                 <td className="py-2">{item.label}</td>
                 <td className="capitalize">{item.status}</td>
                 <td className="tabular-nums">{item.included ? formatNumber(item.counted) : "—"}</td>
-                <td className="tabular-nums">{item.weight}</td>
-                <td className="tabular-nums">{item.included ? formatNumber(item.points) : "0"}</td>
+                <td><UsdcAmount points={item.weight} /></td>
+                <td>{item.included ? <UsdcAmount points={item.points} /> : <UsdcAmount points={0} />}</td>
               </tr>
             ))}
           </tbody>

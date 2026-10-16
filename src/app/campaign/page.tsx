@@ -1,3 +1,4 @@
+import { UsdcInline } from "@/components/usdc-amount";
 import { explainFormula } from "@/server/points/calculate";
 import { getStore } from "@/server/db";
 import { formatWhen } from "@/lib/utils";
@@ -53,10 +54,10 @@ export default async function CampaignPage() {
         </ul>
       </section>
       <section className="rounded-none border border-line bg-panel p-5">
-        <h2 className="font-display text-xl">Point rules</h2>
+        <h2 className="font-display text-xl"><UsdcInline text="USDC rates" /></h2>
         <ul className="mt-3 space-y-2 text-sm">
           {explainFormula(settings).map((line) => (
-            <li key={line}>{line}</li>
+            <li key={line}><UsdcInline text={line} /></li>
           ))}
         </ul>
       </section>
