@@ -120,7 +120,7 @@ export async function registerClaim(options: {
   }
   const points = user.currentPoints + (await referralBonus(user.username));
   if (points < campaign.minPoints) {
-    throw new ServiceError("This profile does not meet the points requirement.", "validation", 403);
+    throw new ServiceError("This profile does not meet the USDC requirement.", "validation", 403);
   }
   if (user.canonicalWallet !== options.wallet) {
     throw new ServiceError("The wallet does not match the profile's canonical wallet.", "validation", 422);

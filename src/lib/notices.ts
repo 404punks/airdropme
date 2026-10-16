@@ -7,10 +7,10 @@ export function profileNotice(notice?: string): string | null {
     return extra || null;
   }
   if (/stored snapshot refreshed/i.test(text)) {
-    return joinNotice("Your points were refreshed from the latest public data.", text, /stored snapshot refreshed\.?/i);
+    return joinNotice("Your USDC was refreshed from the latest public data.", text, /stored snapshot refreshed\.?/i);
   }
   if (/already registered/i.test(text)) {
-    return joinNotice("This profile was already checked. Showing the latest stored points.", text, /this profile is already registered\. showing the latest stored snapshot\.?/i);
+    return joinNotice("This profile was already checked. Showing the latest stored USDC.", text, /this profile is already registered\. showing the latest stored snapshot\.?/i);
   }
   return text;
 }

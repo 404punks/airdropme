@@ -33,7 +33,7 @@ function defaultCampaign(): CampaignRecord {
     funded: false,
     minPoints: 1,
     description:
-      "PTS reflect public Pump.fun statistics for this campaign. No token allocation is configured, and a wallet is used only when claiming is open.",
+      "USDC reflects public Pump.fun statistics for this campaign. No token allocation is configured, and a wallet is used only when claiming is open.",
     distributionEnabled: false,
     updatedAt: nowIso(),
   };

@@ -1,5 +1,6 @@
 import { CopyLink } from "@/components/copy-link";
-import { formatNumber, formatWhen } from "@/lib/utils";
+import { ReferralUsdc, UsdcInline } from "@/components/usdc-amount";
+import { formatWhen } from "@/lib/utils";
 import type { ReferralHistoryRecord } from "@/server/referrals/logic";
 
 function safeImage(url: string | null): string | null {
@@ -32,7 +33,7 @@ export function ReferralPanel({
   return (
     <section className="border border-line bg-panel p-4 sm:p-5">
       <h2 className="font-display text-xl">Referral</h2>
-      <p className="mt-2 text-sm text-mute">Each joined referral gives you 1% of that account&apos;s reward. Referral history stays in Firebase.</p>
+      <p className="mt-2 text-sm text-mute"><UsdcInline text="Each joined referral gives you 1% of that account's USDC. Referral history stays in Firebase." /></p>
       {!username ? (
         <p className="mt-4 text-sm text-mute">Referral links use a Pump.fun username. This profile does not have one yet.</p>
       ) : !link ? (
@@ -46,7 +47,7 @@ export function ReferralPanel({
         <p className="mt-4 text-sm text-warn">Referral history could not be loaded from Firebase. Nothing on this page deletes stored referrals.</p>
       ) : (
         <p className="mt-4 text-sm text-mist">
-          {formatNumber(points)} referral PTS · {made} joined from your link
+          <ReferralUsdc sharePoints={points} /> from referrals · {made} joined from your link
           {joined > 0 ? " · you joined from a referral" : ""}
         </p>
       )}
@@ -68,9 +69,13 @@ export function ReferralPanel({
                 <div className="min-w-0">
                   <p className="truncate font-medium">{name}</p>
                   <p className="text-sm text-mute">
-                    {outgoing
-                      ? `Joined with your link · ${formatNumber(row.referrerPoints)} PTS, 1% of their reward`
-                      : "You joined with this link. The referrer receives 1% of this reward."}
+                    {outgoing ? (
+                      <>
+                        Joined with your link · <ReferralUsdc sharePoints={row.referrerPoints} />, 1% of their <UsdcInline text="USDC" />
+                      </>
+                    ) : (
+                      <UsdcInline text="You joined with this link. The referrer receives 1% of this USDC." />
+                    )}
                   </p>
                   <p className="text-xs text-mute">{formatWhen(row.createdAt)}</p>
                 </div>

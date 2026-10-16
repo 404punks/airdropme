@@ -1,10 +1,11 @@
 import { ClaimClient } from "@/components/claim-client";
 import { InactiveClaimButton } from "@/components/inactive-claim-button";
+import { UsdcAmount, UsdcInline } from "@/components/usdc-amount";
 import { config } from "@/server/config";
 import { getStore } from "@/server/db";
 
 const steps = [
-  ["Step 1 — Check Your Eligibility", "Enter your Pump.fun username or wallet address to check your PTS and review your eligibility status."],
+  ["Step 1 — Check Your Eligibility", "Enter your Pump.fun username or wallet address to check your USDC and review your eligibility status."],
   ["Step 2 — Connect Your Wallet", "Connect with WalletConnect, Phantom, or Solflare. Chrome and wallet apps can connect. This connection does not ask for a seed phrase. Make sure you select the correct wallet."],
   ["Step 3 — Review Your Claim", "If you are eligible and claiming is open, review the available claim details, including the token, amount, and destination wallet, before continuing."],
   ["Step 4 — Confirm Your Claim", "Approve the transaction in your wallet only after reviewing the transaction details. Never share your recovery phrase or private keys."],
@@ -35,7 +36,7 @@ export default async function ClaimPage() {
         {steps.map(([title, copy]) => (
           <li key={title} className="rounded-none border border-line bg-navy p-5">
             <h2 className="font-display text-lg">{title}</h2>
-            <p className="mt-2 text-sm leading-6 text-mute">{copy}</p>
+            <p className="mt-2 text-sm leading-6 text-mute"><UsdcInline text={copy} /></p>
           </li>
         ))}
       </ol>
@@ -52,7 +53,7 @@ export default async function ClaimPage() {
           </p>
         )}
         <p className="mt-3 text-sm text-mute">
-          A claim can be registered only when the campaign is open, the account meets {campaign.minPoints.toLocaleString("en-US")} PTS,
+          A claim can be registered only when the campaign is open, the account meets <UsdcAmount points={campaign.minPoints} markClassName="h-3.5 w-3.5" />,
           the profile is not excluded, and the connected wallet matches the public Pump.fun wallet.
         </p>
         {claimOpen ? (
@@ -60,7 +61,7 @@ export default async function ClaimPage() {
             <ClaimClient rpcUrl={config.SOLANA_RPC_URL} distributionEnabled={config.distributionEnabled} projectId={config.walletConnectProjectId} />
           </div>
         ) : (
-          <p className="mt-5 text-sm text-mist">Claim coming soon. You can check PTS without connecting a wallet.</p>
+          <p className="mt-5 text-sm text-mist"><UsdcInline text="Claim coming soon. You can check USDC without connecting a wallet." /></p>
         )}
       </section>
     </div>

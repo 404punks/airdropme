@@ -114,7 +114,7 @@ function ClaimInner({ rpcUrl, distributionEnabled }: { rpcUrl: string; distribut
         </p>
       ) : null}
       <label className="block text-sm font-medium" htmlFor="profileId">
-        Profile id from your PTS page
+        Profile id from your USDC page
       </label>
       <Input
         id="profileId"

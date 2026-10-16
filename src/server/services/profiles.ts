@@ -6,7 +6,7 @@ import { NotPumpProfileError, ProfileNotFoundError, type FetchOutcome, type Stat
 import { hashIp } from "@/server/security/ip";
 import { rateLimit } from "@/server/security/rate-limit";
 import { DEFAULT_SITE_ORIGIN, referralUrl, referrerShare } from "@/server/referrals/logic";
-import { formatNumber } from "@/lib/utils";
+import { formatReferralUsdc } from "@/server/points/calculate";
 import { applyReferral, getReferralRepository, publishReferralLink } from "@/server/referrals/service";
 import { parseIdentifier } from "@/server/validation/identifier";
 
@@ -276,7 +276,7 @@ async function rememberReferral(input: {
     }
   }
   if (!input.referrerUsername || !input.referredUsername) return note;
-  if (!store) return "Referral points were not saved because Firebase is not configured.";
+  if (!store) return "Referral USDC was not saved because Firebase is not configured.";
   try {
     const grant = await applyReferral(store, {
       referrerUsername: input.referrerUsername,
@@ -287,8 +287,8 @@ async function rememberReferral(input: {
       createdAt: input.createdAt,
     });
     if (grant.status === "recorded") {
-      const share = formatNumber(referrerShare(input.referredRewardPoints));
-      return `You joined from a referral link. Your referrer receives ${share} PTS, 1% of your reward. This referral is stored in Firebase and is not deleted.`;
+      const share = formatReferralUsdc(referrerShare(input.referredRewardPoints));
+      return `You joined from a referral link. Your referrer receives $${share} USDC, 1% of your USDC. This referral is stored in Firebase and is not deleted.`;
     }
     if (grant.status === "rejected" && grant.reason) return grant.reason;
     return note;

@@ -1,4 +1,4 @@
-import { UsdcInline } from "@/components/usdc-amount";
+import { UsdcAmount, UsdcInline } from "@/components/usdc-amount";
 import { explainFormula } from "@/server/points/calculate";
 import { getStore } from "@/server/db";
 import { formatWhen } from "@/lib/utils";
@@ -16,7 +16,9 @@ export default async function CampaignPage() {
       <div>
         <p className="text-sm text-blue">{claimOpen ? "Claiming is open" : "Claim coming soon"}</p>
         <h1 className="mt-2 font-display text-4xl">{campaign.name}</h1>
-        <p className="mt-3 max-w-3xl text-mute">{campaign.description}</p>
+        <p className="mt-3 max-w-3xl text-mute">
+          <UsdcInline text={campaign.description.replaceAll("PTS", "USDC")} />
+        </p>
       </div>
       <section className="grid gap-4 md:grid-cols-2">
         <article className="rounded-none border border-line bg-panel p-5">
@@ -42,7 +44,7 @@ export default async function CampaignPage() {
       <section className="rounded-none border border-line bg-navy p-5">
         <h2 className="font-display text-xl">Claim rules</h2>
         <ul className="mt-3 space-y-2 text-sm text-mute">
-          <li>At least {campaign.minPoints.toLocaleString("en-US")} PTS from verified statistics.</li>
+          <li>At least <UsdcAmount points={campaign.minPoints} markClassName="h-3.5 w-3.5" /> from verified statistics.</li>
           <li>The profile is not flagged or banned.</li>
           <li>The claim wallet matches the canonical Solana wallet published for that Pump.fun profile.</li>
           <li>Campaign status is claim open.</li>
