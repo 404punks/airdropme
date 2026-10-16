@@ -3,7 +3,8 @@ export function profileNotice(notice?: string): string | null {
   const text = notice.trim();
   if (!text) return null;
   if (/profile registered from public pump\.fun data/i.test(text)) {
-    return joinNotice("Profile information was retrieved from publicly available Pump.fun data.", text, /profile registered from public pump\.fun data\.?/i);
+    const extra = text.replace(/profile registered from public pump\.fun data\.?/i, "").trim();
+    return extra || null;
   }
   if (/stored snapshot refreshed/i.test(text)) {
     return joinNotice("Your points were refreshed from the latest public data.", text, /stored snapshot refreshed\.?/i);

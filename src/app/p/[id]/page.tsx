@@ -6,7 +6,8 @@ import { getStore } from "@/server/db";
 import { getProvider } from "@/server/pumpfun";
 import { referrerFromCookieHeader } from "@/server/referrals/cookie";
 import { originFromHeaders } from "@/server/referrals/logic";
-import { getReferralRepository, loadReferralState, publishReferralLink, summaryFor } from "@/server/referrals/service";
+import { presentReferralHistory } from "@/server/referrals/logic";
+import { getReferralRepository, loadReferralState, publishReferralLink, referralRewardPoints, summaryFor } from "@/server/referrals/service";
 import { ipFromHeaders } from "@/server/security/ip";
 import { profileReferralLink, ServiceError, viewProfile } from "@/server/services/profiles";
 
@@ -74,7 +75,9 @@ export default async function ProfilePage({
         origin,
       });
       const state = await loadReferralState(referrals);
-      const summary = summaryFor(view.user.username, state.history);
+      const rewards = await referralRewardPoints(state.history.map((row) => row.referredUsername));
+      const history = presentReferralHistory(state.history, rewards);
+      const summary = summaryFor(view.user.username, history);
       referral.points = summary.points;
       referral.made = summary.made;
       referral.joined = summary.joined;

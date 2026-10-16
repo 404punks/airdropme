@@ -9,6 +9,7 @@ import {
   type ReferralLinkRecord,
 } from "@/server/referrals/logic";
 import { config } from "@/server/config";
+import { getStore } from "@/server/db";
 import { FirestoreReferralStore } from "@/server/referrals/firestore";
 import type { ReferralRepository } from "@/server/referrals/repository";
 
@@ -43,6 +44,7 @@ export async function applyReferral(
     origin: string;
     createdAt: string;
     now?: number;
+    referredRewardPoints?: number;
   },
 ): Promise<ReferralGrant> {
   if (!canAttachReferral(input.createdAt, input.now)) {
@@ -87,4 +89,18 @@ export async function loadReferralState(store: ReferralRepository): Promise<{
 
 export function summaryFor(username: string, history: ReferralHistoryRecord[]) {
   return pointsFromHistory(username, history);
+}
+
+export async function referralRewardPoints(usernames: string[]): Promise<Map<string, number>> {
+  const rewards = new Map<string, number>();
+  const names = [...new Set(usernames.map((name) => name.trim()).filter(Boolean))];
+  if (!names.length) return rewards;
+  const repo = getStore();
+  await Promise.all(
+    names.map(async (name) => {
+      const user = await repo.findUserByUsername(name);
+      if (user) rewards.set(name.toLowerCase(), user.currentPoints);
+    }),
+  );
+  return rewards;
 }
