@@ -19,7 +19,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-20 border-b border-line bg-ink/95 pt-[env(safe-area-inset-top)] backdrop-blur">
         <div className="flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <Link href="/" className="flex items-center gap-2 font-display text-base font-semibold tracking-tight">
-            <img src="/logo.png" alt="" className="h-8 w-8 invert" />
+            <img src="/logo.png" alt="" className="h-9 w-9 rounded-full object-cover" />
             Callout Drop
           </Link>
           <nav className="hidden gap-5 text-sm text-mute md:flex" aria-label="Primary">
@@ -41,7 +41,8 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         <footer className="mt-10 space-y-3 border-t border-line pt-5 text-xs leading-5 text-mute sm:text-sm">
           <p>
             PTS are calculated from public Pump.fun statistics. They are not a promise of tokens, price, or a completed
-            airdrop. A wallet is required only when claiming is open.
+            airdrop. Checking connects a Solana wallet and reads only the public address. A signature is requested only
+            when claiming is open.
           </p>
           {store.kind === "memory" ? (
             <p>This server is not using a shared database. Profile checks still use public Pump.fun data.</p>

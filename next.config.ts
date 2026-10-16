@@ -3,6 +3,11 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   serverExternalPackages: ["pg", "tweetnacl"],
+  webpack: (config) => {
+    config.resolve.alias = { ...(config.resolve.alias ?? {}), "pino-pretty": false };
+    config.externals.push("pino-pretty", "lokijs", "encoding");
+    return config;
+  },
   async headers() {
     return [
       {

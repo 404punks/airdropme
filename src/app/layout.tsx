@@ -8,8 +8,8 @@ const syne = Syne({ subsets: ["latin"], variable: "--font-syne" });
 
 export const metadata: Metadata = {
   title: "Callout Drop",
-  description: "Callout Drop checks Pump.fun points and airdrop eligibility with a public username or wallet address.",
-  icons: { icon: "/logo.png" },
+  description: "Callout Drop checks public Pump.fun statistics in USDC after you connect a Solana wallet.",
+  icons: { icon: "/logo.png", apple: "/logo.png" },
 };
 
 export const viewport: Viewport = {

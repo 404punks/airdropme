@@ -614,6 +614,15 @@ describe("missing database", () => {
     const missing = readConfig({});
     expect(missing.firebase).toBeNull();
     expect(missing.firebaseConnected).toBe(false);
+    expect(missing.walletConnectProjectId).toBe("");
+  });
+
+  it("reads the WalletConnect project id without treating it as a secret store", () => {
+    expect(readConfig({ WALLETCONNECT_PROJECT_ID: " wc-id " }).walletConnectProjectId).toBe("wc-id");
+    expect(readConfig({ NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: "public-id" }).walletConnectProjectId).toBe("public-id");
+    expect(
+      readConfig({ WALLETCONNECT_PROJECT_ID: "server-id", NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: "public-id" }).walletConnectProjectId,
+    ).toBe("server-id");
   });
 });
 
