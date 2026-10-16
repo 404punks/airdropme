@@ -6,6 +6,7 @@ import { ConnectionProvider, WalletProvider, useWallet } from "@solana/wallet-ad
 import { useWalletModal, WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import { CopyAddress } from "@/components/copy-address";
+import { LOGOUT_EVENT } from "@/components/logout-button";
 import { createSolanaWallets } from "@/components/wallet-adapters";
 import type { SavedReferral } from "@/lib/saved-referral";
 
@@ -70,6 +71,7 @@ function ConnectAndCheck({
           username?: string | null;
           wallet?: string | null;
           referralLink?: string | null;
+          points?: number;
         };
         if (!response.ok || !body.userId) {
           started.current = "";
@@ -85,6 +87,7 @@ function ConnectAndCheck({
           profileKey,
           username: body.username ?? null,
           referralLink: body.referralLink ?? null,
+          points: typeof body.points === "number" ? body.points : null,
         };
         onSavedRef.current(entry);
         if (body.wallet && body.wallet !== address) onSavedRef.current({ ...entry, wallet: body.wallet });
@@ -97,6 +100,15 @@ function ConnectAndCheck({
         setPending(false);
       });
   }, [connected, publicKey, router]);
+
+  useEffect(() => {
+    function onLogout() {
+      started.current = "";
+      void disconnect();
+    }
+    window.addEventListener(LOGOUT_EVENT, onLogout);
+    return () => window.removeEventListener(LOGOUT_EVENT, onLogout);
+  }, [disconnect]);
 
   const address = publicKey?.toBase58() ?? "";
 

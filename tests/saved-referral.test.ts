@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   completeReferralSteps,
   emptyReferralBook,
+  logoutCheckSession,
   parseReferralBook,
   rememberWalletReferral,
 } from "@/lib/saved-referral";
@@ -11,6 +12,7 @@ const alpha = {
   profileKey: "WalletA",
   username: "alpha",
   referralLink: "https://www.calloutdrop.app/r/alpha",
+  points: 182,
 };
 
 describe("saved wallet referrals", () => {
@@ -21,17 +23,20 @@ describe("saved wallet referrals", () => {
       profileKey: "",
       username: null,
       referralLink: null,
+      points: null,
     });
     expect(second.byWallet.WalletA).toMatchObject({
       profileKey: "WalletA",
       username: "alpha",
       referralLink: "https://www.calloutdrop.app/r/alpha",
+      points: 182,
     });
     const both = rememberWalletReferral(second, {
       wallet: "WalletB",
       profileKey: "beta",
       username: "beta",
       referralLink: "https://www.calloutdrop.app/r/beta",
+      points: 19,
     });
     expect(both.lastWallet).toBe("WalletB");
     expect(both.byWallet.WalletA.referralLink).toBe("https://www.calloutdrop.app/r/alpha");
@@ -45,6 +50,7 @@ describe("saved wallet referrals", () => {
       profileKey: "WalletA",
       username: null,
       referralLink: null,
+      points: null,
     });
     expect(again.stepsComplete).toBe(true);
     expect(again.byWallet.WalletA.referralLink).toBe("https://www.calloutdrop.app/r/alpha");
@@ -53,5 +59,24 @@ describe("saved wallet referrals", () => {
     expect(parsed.lastWallet).toBe("WalletA");
     expect(parsed.byWallet.WalletA.referralLink).toBe("https://www.calloutdrop.app/r/alpha");
     expect(parseReferralBook("not-json")).toEqual(emptyReferralBook());
+    expect(parsed.byWallet.WalletA.points).toBe(182);
+  });
+
+  it("logs out of the check without deleting the saved referral", () => {
+    const saved = completeReferralSteps(rememberWalletReferral(emptyReferralBook(), alpha));
+    const loggedOut = logoutCheckSession(saved);
+    expect(loggedOut.stepsComplete).toBe(false);
+    expect(loggedOut.lastWallet).toBe("WalletA");
+    expect(loggedOut.byWallet.WalletA.referralLink).toBe("https://www.calloutdrop.app/r/alpha");
+    expect(loggedOut.byWallet.WalletA.points).toBe(182);
+    const kept = rememberWalletReferral(loggedOut, {
+      wallet: "WalletA",
+      profileKey: "WalletA",
+      username: "alpha",
+      referralLink: null,
+      points: null,
+    });
+    expect(kept.byWallet.WalletA.referralLink).toBe("https://www.calloutdrop.app/r/alpha");
+    expect(kept.byWallet.WalletA.points).toBe(182);
   });
 });

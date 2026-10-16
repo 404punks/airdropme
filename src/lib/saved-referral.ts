@@ -5,6 +5,7 @@ export interface SavedReferral {
   profileKey: string;
   username: string | null;
   referralLink: string | null;
+  points: number | null;
 }
 
 export interface ReferralBook {
@@ -26,6 +27,7 @@ export function rememberWalletReferral(book: ReferralBook, entry: SavedReferral)
     profileKey: entry.profileKey || prior?.profileKey || "",
     username: entry.username ?? prior?.username ?? null,
     referralLink: entry.referralLink ?? prior?.referralLink ?? null,
+    points: typeof entry.points === "number" ? entry.points : (typeof prior?.points === "number" ? prior.points : null),
   };
   return {
     lastWallet: wallet,
@@ -36,6 +38,10 @@ export function rememberWalletReferral(book: ReferralBook, entry: SavedReferral)
 
 export function completeReferralSteps(book: ReferralBook): ReferralBook {
   return { ...book, stepsComplete: true };
+}
+
+export function logoutCheckSession(book: ReferralBook): ReferralBook {
+  return { ...book, stepsComplete: false };
 }
 
 export function parseReferralBook(raw: string | null): ReferralBook {
@@ -54,6 +60,7 @@ export function parseReferralBook(raw: string | null): ReferralBook {
         profileKey: typeof record.profileKey === "string" ? record.profileKey : "",
         username: typeof record.username === "string" ? record.username : null,
         referralLink: typeof record.referralLink === "string" ? record.referralLink : null,
+        points: typeof record.points === "number" && Number.isFinite(record.points) ? record.points : null,
       };
     }
     const requested = typeof value.lastWallet === "string" ? value.lastWallet : "";
