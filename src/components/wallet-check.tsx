@@ -17,17 +17,23 @@ export function WalletCheck({
   rpcUrl,
   projectId,
   onSaved,
+  onConnectionChange,
 }: {
   rpcUrl: string;
   projectId: string;
   onSaved: (entry: SavedReferral) => void;
+  onConnectionChange?: (wallet: string | null) => void;
 }) {
   const wallets = useMemo(() => createSolanaWallets(rpcUrl, projectId), [rpcUrl, projectId]);
   return (
     <ConnectionProvider endpoint={rpcUrl}>
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
-          <ConnectAndCheck onSaved={onSaved} walletConnectReady={Boolean(projectId.trim())} />
+          <ConnectAndCheck
+            onSaved={onSaved}
+            onConnectionChange={onConnectionChange}
+            walletConnectReady={Boolean(projectId.trim())}
+          />
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
@@ -36,9 +42,11 @@ export function WalletCheck({
 
 function ConnectAndCheck({
   onSaved,
+  onConnectionChange,
   walletConnectReady,
 }: {
   onSaved: (entry: SavedReferral) => void;
+  onConnectionChange?: (wallet: string | null) => void;
   walletConnectReady: boolean;
 }) {
   const router = useRouter();
@@ -48,7 +56,14 @@ function ConnectAndCheck({
   const [pending, setPending] = useState(false);
   const started = useRef("");
   const onSavedRef = useRef(onSaved);
+  const onConnectionChangeRef = useRef(onConnectionChange);
   onSavedRef.current = onSaved;
+  onConnectionChangeRef.current = onConnectionChange;
+
+  useEffect(() => {
+    onConnectionChangeRef.current?.(connected && publicKey ? publicKey.toBase58() : null);
+    return () => onConnectionChangeRef.current?.(null);
+  }, [connected, publicKey]);
 
   useEffect(() => {
     if (!connected || !publicKey) return;

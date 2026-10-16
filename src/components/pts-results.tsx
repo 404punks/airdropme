@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { CopyAddress } from "@/components/copy-address";
 import { InactiveClaimButton } from "@/components/inactive-claim-button";
-import { LogoutButton } from "@/components/logout-button";
+import { ConnectedLogout } from "@/components/logout-button";
 import { PointsChart } from "@/components/points-chart";
 import { ReferralPanel } from "@/components/referral-panel";
 import { RefreshButton } from "@/components/refresh-button";
 import { ReferralUsdc, UsdcAmount, UsdcInline } from "@/components/usdc-amount";
 import { Badge } from "@/components/ui/badge";
 import { qualification } from "@/lib/eligibility";
+import { config } from "@/server/config";
 import { profileNotice } from "@/lib/notices";
 import { publicProfileKey } from "@/lib/profile-key";
 import { formatNumber, formatWhen, metricLabel, shortKey } from "@/lib/utils";
@@ -113,7 +114,7 @@ export function PtsResults({
         </div>
         <div className="flex w-full flex-col gap-2 sm:w-auto">
           <RefreshButton profileKey={publicProfileKey(user)} />
-          <LogoutButton redirectTo="/" />
+          <ConnectedLogout rpcUrl={config.SOLANA_RPC_URL} projectId={config.walletConnectProjectId} redirectTo="/" />
         </div>
       </div>
 

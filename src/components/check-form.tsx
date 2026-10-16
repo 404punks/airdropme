@@ -32,6 +32,7 @@ export function CheckForm({
   projectId?: string;
 }) {
   const [book, setBook] = useState<ReferralBook>(emptyReferralBook);
+  const [connectedWallet, setConnectedWallet] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
   const [followed, setFollowed] = useState(false);
   const [shared, setShared] = useState(false);
@@ -68,6 +69,7 @@ export function CheckForm({
       setFollowed(false);
       setShared(false);
       setReady(false);
+      setConnectedWallet(null);
     }
     window.addEventListener(LOGOUT_EVENT, onLogout);
     return () => window.removeEventListener(LOGOUT_EVENT, onLogout);
@@ -91,11 +93,11 @@ export function CheckForm({
     persist(rememberWalletReferral(bookRef.current, entry));
   }
 
-  const saved = book.lastWallet ? book.byWallet[book.lastWallet] : undefined;
+  const saved = connectedWallet ? book.byWallet[connectedWallet] : undefined;
 
   return (
     <div className="space-y-4">
-      {saved?.referralLink ? (
+      {connectedWallet && saved?.referralLink ? (
         <div className="border border-line bg-navy p-4">
           <p className="text-sm text-mist">Your referral link stays with this wallet. A refresh or disconnect does not remove it.</p>
           <div className="mt-3">
@@ -104,7 +106,7 @@ export function CheckForm({
         </div>
       ) : null}
       {ready ? (
-        <WalletCheck rpcUrl={rpcUrl} projectId={projectId} onSaved={remember} />
+        <WalletCheck rpcUrl={rpcUrl} projectId={projectId} onSaved={remember} onConnectionChange={setConnectedWallet} />
       ) : (
         <div className="flex flex-col gap-3">
           <a
@@ -133,7 +135,7 @@ export function CheckForm({
           {invitedBy} invited you. They receive 1% of this account&apos;s <UsdcInline text="USDC" />.
         </p>
       ) : null}
-      <LogoutButton />
+      {connectedWallet ? <LogoutButton /> : null}
     </div>
   );
 }
