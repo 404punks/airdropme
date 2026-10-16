@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { MobileNav } from "@/components/mobile-nav";
+import { UsdcInline } from "@/components/usdc-amount";
 import { config } from "@/server/config";
 import { getStore } from "@/server/db";
 
 const links = [
   ["Home", "/"],
-  ["Check Your PTS", "/#check"],
+  ["Check Your USDC", "/#check"],
   ["Referrals", "/referrals"],
   ["Airdrop Claim", "/claim"],
   ["How It Works", "/how-it-works"],
@@ -24,7 +25,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
           <nav className="hidden gap-5 text-sm text-mute md:flex" aria-label="Primary">
             {links.map(([label, href]) => (
               <Link key={href} href={href} className="hover:text-white">
-                {label}
+                {label.includes("USDC") ? <UsdcInline text={label} /> : label}
               </Link>
             ))}
           </nav>

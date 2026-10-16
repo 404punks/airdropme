@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 
 async function writeClipboard(value: string): Promise<boolean> {
   try {
@@ -61,7 +60,7 @@ export function CopyLink({ link, compact = false }: { link: string; compact?: bo
 
   return (
     <div className="space-y-3">
-      <Input readOnly value={link} aria-label="Referral link" onFocus={(event) => event.currentTarget.select()} />
+      <p aria-label="Referral link" className="break-all border border-line bg-ink px-4 py-3 text-sm text-mist">{link}</p>
       <button
         type="button"
         onClick={copy}
