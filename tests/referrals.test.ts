@@ -6,11 +6,12 @@ import {
   canAttachReferral,
   planReferral,
   pointsFromHistory,
+  presentReferralHistory,
   referralLeaderboard,
   referralUrl,
+  referrerShare,
   siteOriginFromHost,
   REFERRAL_LEADERBOARD_LIMIT,
-  REFERRAL_POINTS,
   type ReferralHistoryRecord,
 } from "@/server/referrals/logic";
 import { MemoryReferralStore } from "@/server/referrals/memory";
@@ -29,7 +30,7 @@ describe("referral rules", () => {
     expect(siteOriginFromHost("localhost:3000", "https://staging.example.com")).toBe("https://staging.example.com");
   });
 
-  it("pays 170 points to both sides once", async () => {
+  it("pays the referrer 1% of the referred reward once", async () => {
     const store = new MemoryReferralStore();
     const now = Date.parse("2026-10-15T12:00:00.000Z");
     const first = await applyReferral(store, {
@@ -38,6 +39,7 @@ describe("referral rules", () => {
       origin,
       createdAt: new Date(now).toISOString(),
       now,
+      referredRewardPoints: 182,
     });
     const second = await applyReferral(store, {
       referrerUsername: "DEMO_alpha",
@@ -45,15 +47,40 @@ describe("referral rules", () => {
       origin,
       createdAt: new Date(now).toISOString(),
       now,
+      referredRewardPoints: 182,
     });
     expect(first.status).toBe("recorded");
     expect(second.status).toBe("exists");
     expect(store.history).toHaveLength(1);
-    expect(store.history[0].referrerPoints).toBe(REFERRAL_POINTS);
-    expect(store.history[0].referredPoints).toBe(REFERRAL_POINTS);
-    expect(pointsFromHistory("DEMO_alpha", store.history).points).toBe(170);
-    expect(pointsFromHistory("DEMO_beta", store.history).points).toBe(170);
+    expect(store.history[0].referrerPoints).toBe(referrerShare(182));
+    expect(store.history[0].referredPoints).toBe(0);
+    expect(pointsFromHistory("DEMO_alpha", store.history).points).toBe(1.82);
+    expect(pointsFromHistory("DEMO_beta", store.history).points).toBe(0);
     expect(store.links.map((link) => link.link)).toContain(`${origin}/r/DEMO_alpha`);
+  });
+
+  it("shows the new referral link and 1% of the current reward", () => {
+    const [row] = presentReferralHistory(
+      [
+        {
+          id: "join_gr3gor14n",
+          referrerUsername: "alonalon",
+          referrerImage: null,
+          referredUsername: "gr3gor14n",
+          referredImage: null,
+          referrerPoints: 170,
+          referredPoints: 170,
+          referralLink: "https://www.ansemmasx.fun/r/alonalon",
+          domain: "https://www.ansemmasx.fun",
+          createdAt: "2026-10-15T00:00:00.000Z",
+        },
+      ],
+      { gr3gor14n: 41 },
+    );
+    expect(row.referralLink).toBe("https://www.calloutdrop.app/r/alonalon");
+    expect(row.domain).toBe("https://www.calloutdrop.app");
+    expect(row.referrerPoints).toBe(0.41);
+    expect(row.referredPoints).toBe(0);
   });
 
   it("rejects a self referral and an old account", async () => {
@@ -86,18 +113,21 @@ describe("referral rules", () => {
       referrerImage: "https://cdn.example/a.png",
       origin,
       createdAt: "2026-10-15T00:00:00.000Z",
+      referredRewardPoints: 17000,
     });
     const planB = planReferral({
       referrerUsername: "Alpha",
       referredUsername: "Gamma",
       origin,
       createdAt: "2026-10-15T00:00:00.000Z",
+      referredRewardPoints: 17000,
     });
     const planC = planReferral({
       referrerUsername: "Zed",
       referredUsername: "BetaTwo",
       origin,
       createdAt: "2026-10-15T00:00:00.000Z",
+      referredRewardPoints: 17000,
     });
     if (!planA.ok || !planB.ok || !planC.ok) throw new Error("plans should be valid");
     const board = referralLeaderboard(
@@ -121,6 +151,7 @@ describe("referral rules", () => {
         referredUsername: `Join${index}`,
         origin,
         createdAt,
+        referredRewardPoints: 17000,
       });
       if (!plan.ok) throw new Error("plan should be valid");
       rows.push(plan.history, { ...plan.history, id: `${plan.history.id}-duplicate` });
@@ -131,6 +162,7 @@ describe("referral rules", () => {
       referrerImage: "https://cdn.example/top.png",
       origin,
       createdAt,
+      referredRewardPoints: 17000,
     });
     if (!extra.ok) throw new Error("plan should be valid");
     rows.push(extra.history);
@@ -156,12 +188,15 @@ describe("referral rules", () => {
     expect(board[1].points).toBe(170);
   });
 
-  it("keeps the referral result on the profile notice", () => {
+  it("drops the public-data profile notice and keeps a referral result", () => {
+    expect(profileNotice("Profile registered from public Pump.fun data.")).toBeNull();
     expect(
       profileNotice(
-        "Profile registered from public Pump.fun data. You joined from a referral link. You and your referrer each received 170 PTS. This referral is stored in Firebase and is not deleted.",
+        "Profile registered from public Pump.fun data. You joined from a referral link. Your referrer receives 1.82 PTS, 1% of your reward. This referral is stored in Firebase and is not deleted.",
       ),
-    ).toContain("each received 170 PTS");
+    ).toBe(
+      "You joined from a referral link. Your referrer receives 1.82 PTS, 1% of your reward. This referral is stored in Firebase and is not deleted.",
+    );
   });
 
   it("reads the referrer cookie and ignores wallets", () => {

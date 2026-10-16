@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { CopyLink } from "@/components/copy-link";
-import { getReferralRepository, loadReferralState } from "@/server/referrals/service";
-import { DEFAULT_SITE_ORIGIN, REFERRAL_POINTS } from "@/server/referrals/logic";
+import { getReferralRepository, loadReferralState, referralRewardPoints } from "@/server/referrals/service";
+import { DEFAULT_SITE_ORIGIN, presentReferralHistory, referralLeaderboard } from "@/server/referrals/logic";
 import { formatNumber } from "@/lib/utils";
 
 function safeImage(url: string | null): string | null {
@@ -23,8 +23,10 @@ export default async function ReferralsPage() {
   else {
     try {
       const state = await loadReferralState(store);
-      board = state.board;
-      history = [...state.history].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+      const rewards = await referralRewardPoints(state.history.map((row) => row.referredUsername));
+      const historyRows = presentReferralHistory(state.history, rewards);
+      board = referralLeaderboard(historyRows, state.links);
+      history = [...historyRows].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
     } catch {
       unavailable = true;
     }
@@ -36,7 +38,7 @@ export default async function ReferralsPage() {
         <p className="text-xs font-medium text-blue">Callout Drop</p>
         <h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">Top 100 referrers</h1>
         <p className="mt-4 max-w-2xl text-mute">
-          A referral link is created from your Pump.fun username after your profile and wallet address are connected. It uses {DEFAULT_SITE_ORIGIN}. When someone joins from that link, you receive {REFERRAL_POINTS} PTS and they receive {REFERRAL_POINTS} PTS.
+          A referral link is created from your Pump.fun username after your profile and wallet address are connected. It uses {DEFAULT_SITE_ORIGIN}. When someone joins from that link, you receive 1% of their reward.
         </p>
       </section>
 
@@ -71,7 +73,7 @@ export default async function ReferralsPage() {
                   {row.referrals} referrals · {formatNumber(row.points)} PTS
                 </p>
                 <div className="mt-2 flex items-center gap-2">
-                  <p className="min-w-0 flex-1 truncate text-xs text-blue">{row.link}</p>
+                  <p className="min-w-0 flex-1 break-all text-xs text-blue">{row.link}</p>
                   <CopyLink link={row.link} compact />
                 </div>
               </div>
@@ -99,7 +101,7 @@ export default async function ReferralsPage() {
                   <CopyLink link={row.referralLink} compact />
                 </div>
                 <p className="mt-1 text-mute">
-                  {row.domain} · {row.referrerPoints} PTS to the referrer · {row.referredPoints} PTS to the new account
+                  {row.domain} · {formatNumber(row.referrerPoints)} PTS to the referrer, 1% of their reward
                 </p>
               </li>
             ))}

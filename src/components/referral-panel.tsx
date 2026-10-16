@@ -32,7 +32,7 @@ export function ReferralPanel({
   return (
     <section className="border border-line bg-panel p-4 sm:p-5">
       <h2 className="font-display text-xl">Referral</h2>
-      <p className="mt-2 text-sm text-mute">Each joined referral gives 170 PTS to you and 170 PTS to the new account. Referral history stays in Firebase.</p>
+      <p className="mt-2 text-sm text-mute">Each joined referral gives you 1% of that account&apos;s reward. Referral history stays in Firebase.</p>
       {!username ? (
         <p className="mt-4 text-sm text-mute">Referral links use a Pump.fun username. This profile does not have one yet.</p>
       ) : !link ? (
@@ -67,7 +67,11 @@ export function ReferralPanel({
                 )}
                 <div className="min-w-0">
                   <p className="truncate font-medium">{name}</p>
-                  <p className="text-sm text-mute">{outgoing ? "Joined with your link · 170 PTS" : "You joined with this link · 170 PTS"}</p>
+                  <p className="text-sm text-mute">
+                    {outgoing
+                      ? `Joined with your link · ${formatNumber(row.referrerPoints)} PTS, 1% of their reward`
+                      : "You joined with this link. The referrer receives 1% of this reward."}
+                  </p>
                   <p className="text-xs text-mute">{formatWhen(row.createdAt)}</p>
                 </div>
               </li>

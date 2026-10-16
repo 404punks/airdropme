@@ -9,7 +9,7 @@ const faqs = [
   ["What about retweets?", "The public Callout data includes reposts, not a separate retweet count. Retweets stay unavailable."],
   ["Does refreshing add PTS again?", "No. The score is replaced using the current cumulative totals."],
   ["Does a claim send tokens?", "Not right now. Claiming is not open, and no token distribution is configured. A future claim signature would register a request. It would not send tokens unless a funded distributor is added."],
-  ["How do referrals work?", "After your Pump.fun profile and wallet address are connected, your referral link is https://www.calloutdrop.app/r/ plus your username. When a new account joins from that link, you receive 170 PTS and they receive 170 PTS. The referral link and history are stored with the Firebase API and are not deleted. Refreshing the page, or disconnecting and connecting the wallet again, keeps the same referral link."],
+  ["How do referrals work?", "After your Pump.fun profile and wallet address are connected, your referral link is https://www.calloutdrop.app/r/ plus your username. When someone joins from that link, you receive 1% of their reward. The referral link and history are stored with the Firebase API and are not deleted. Refreshing the page, or disconnecting and connecting the wallet again, keeps the same referral link."],
 ];
 
 export default async function HowItWorksPage() {

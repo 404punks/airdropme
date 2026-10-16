@@ -1,4 +1,4 @@
-export const REFERRAL_POINTS = 170;
+export const REFERRAL_SHARE = 0.01;
 export const REFERRAL_LEADERBOARD_LIMIT = 100;
 export const REFERRAL_ATTACH_WINDOW_MS = 15 * 60 * 1000;
 export const DEFAULT_SITE_ORIGIN = "https://www.calloutdrop.app";
@@ -69,6 +69,53 @@ export function siteOriginFromHost(_host: string | null, configured = ""): strin
   return DEFAULT_SITE_ORIGIN;
 }
 
+export function referrerShare(rewardPoints: number): number {
+  if (!Number.isFinite(rewardPoints) || rewardPoints <= 0) return 0;
+  return Math.round(rewardPoints * 100) / 10000;
+}
+
+export function canonicalReferralLink(link: string, username: string): string {
+  const current = referralUrl(DEFAULT_SITE_ORIGIN, username);
+  try {
+    const url = new URL(link);
+    const legacy = url.hostname === "ansemmasx.fun" || url.hostname.endsWith(".ansemmasx.fun");
+    return legacy || !link ? current : link;
+  } catch {
+    return current;
+  }
+}
+
+export function canonicalReferralDomain(domain: string): string {
+  const trimmed = domain.trim().replace(/\/$/, "");
+  if (!trimmed) return DEFAULT_SITE_ORIGIN;
+  try {
+    const url = new URL(trimmed.includes("://") ? trimmed : `https://${trimmed}`);
+    const legacy = url.hostname === "ansemmasx.fun" || url.hostname.endsWith(".ansemmasx.fun");
+    return legacy ? DEFAULT_SITE_ORIGIN : trimmed;
+  } catch {
+    return DEFAULT_SITE_ORIGIN;
+  }
+}
+
+export function presentReferralHistory(
+  rows: ReferralHistoryRecord[],
+  rewardByUsername: ReadonlyMap<string, number> | Record<string, number>,
+): ReferralHistoryRecord[] {
+  const rewardFor = (username: string) => {
+    const key = username.trim().toLowerCase();
+    if (rewardByUsername instanceof Map) return rewardByUsername.get(key) ?? 0;
+    const record = rewardByUsername as Record<string, number>;
+    return record[key] ?? 0;
+  };
+  return rows.map((row) => ({
+    ...row,
+    referrerPoints: referrerShare(rewardFor(row.referredUsername)),
+    referredPoints: 0,
+    referralLink: canonicalReferralLink(row.referralLink, row.referrerUsername),
+    domain: canonicalReferralDomain(row.domain),
+  }));
+}
+
 export function canAttachReferral(createdAt: string, now = Date.now()): boolean {
   const created = new Date(createdAt).getTime();
   if (!Number.isFinite(created)) return false;
@@ -83,6 +130,7 @@ export function planReferral(input: {
   referredImage?: string | null;
   origin: string;
   createdAt?: string;
+  referredRewardPoints?: number;
 }):
   | { ok: true; history: ReferralHistoryRecord; referrerLink: ReferralLinkRecord; referredLink: ReferralLinkRecord }
   | { ok: false; reason: string } {
@@ -100,8 +148,8 @@ export function planReferral(input: {
     referrerImage: input.referrerImage ?? null,
     referredUsername,
     referredImage: input.referredImage ?? null,
-    referrerPoints: REFERRAL_POINTS,
-    referredPoints: REFERRAL_POINTS,
+    referrerPoints: referrerShare(input.referredRewardPoints ?? 0),
+    referredPoints: 0,
     referralLink: referralUrl(domain, referrerUsername),
     domain,
     createdAt,
@@ -178,6 +226,11 @@ export function referralLeaderboard(rows: ReferralHistoryRecord[], links: Referr
     current.domain = link.domain;
   }
   return [...grouped.values()]
+    .map((row) => ({
+      ...row,
+      link: canonicalReferralLink(row.link, row.username),
+      domain: canonicalReferralDomain(row.domain),
+    }))
     .sort((a, b) => b.referrals - a.referrals || b.points - a.points || a.username.localeCompare(b.username))
     .slice(0, REFERRAL_LEADERBOARD_LIMIT);
 }

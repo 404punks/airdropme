@@ -5,7 +5,8 @@ import { calculatePoints, type PointsBreakdown, type ScoringSettings } from "@/s
 import { NotPumpProfileError, ProfileNotFoundError, type FetchOutcome, type StatsProvider } from "@/server/pumpfun/types";
 import { hashIp } from "@/server/security/ip";
 import { rateLimit } from "@/server/security/rate-limit";
-import { DEFAULT_SITE_ORIGIN, referralUrl } from "@/server/referrals/logic";
+import { DEFAULT_SITE_ORIGIN, referralUrl, referrerShare } from "@/server/referrals/logic";
+import { formatNumber } from "@/lib/utils";
 import { applyReferral, getReferralRepository, publishReferralLink } from "@/server/referrals/service";
 import { parseIdentifier } from "@/server/validation/identifier";
 
@@ -155,6 +156,7 @@ export async function submitProfile(options: {
         referrerUsername: options.referrerUsername,
         referredUsername: existing.username,
         referredImage: existing.profileImage,
+        referredRewardPoints: existing.currentPoints,
         createdAt: existing.createdAt,
         origin: options.origin ?? DEFAULT_SITE_ORIGIN,
       });
@@ -240,6 +242,7 @@ export async function submitProfile(options: {
     referrerUsername: options.referrerUsername,
     referredUsername: saved.user.username,
     referredImage: saved.user.profileImage,
+    referredRewardPoints: saved.user.currentPoints,
     createdAt: saved.user.createdAt,
     origin: options.origin ?? DEFAULT_SITE_ORIGIN,
   });
@@ -255,6 +258,7 @@ async function rememberReferral(input: {
   referrerUsername?: string | null;
   referredUsername: string | null;
   referredImage: string | null;
+  referredRewardPoints: number;
   createdAt: string;
   origin: string;
 }): Promise<string> {
@@ -278,11 +282,13 @@ async function rememberReferral(input: {
       referrerUsername: input.referrerUsername,
       referredUsername: input.referredUsername,
       referredImage: input.referredImage,
+      referredRewardPoints: input.referredRewardPoints,
       origin: input.origin,
       createdAt: input.createdAt,
     });
     if (grant.status === "recorded") {
-      return "You joined from a referral link. You and your referrer each received 170 PTS. This referral is stored in Firebase and is not deleted.";
+      const share = formatNumber(referrerShare(input.referredRewardPoints));
+      return `You joined from a referral link. Your referrer receives ${share} PTS, 1% of your reward. This referral is stored in Firebase and is not deleted.`;
     }
     if (grant.status === "rejected" && grant.reason) return grant.reason;
     return note;

@@ -8,6 +8,7 @@ import type { ReferralRepository } from "@/server/referrals/repository";
 type FirestoreValue =
   | { stringValue: string }
   | { integerValue: string }
+  | { doubleValue: number }
   | { nullValue: null };
 
 type FirestoreFields = Record<string, FirestoreValue>;
@@ -45,7 +46,8 @@ function stringField(value: string): FirestoreValue {
 }
 
 function numberField(value: number): FirestoreValue {
-  return { integerValue: String(Math.trunc(value)) };
+  if (Number.isInteger(value)) return { integerValue: String(value) };
+  return { doubleValue: value };
 }
 
 function nullableField(value: string | null): FirestoreValue {
@@ -69,7 +71,12 @@ function readNullable(fields: FirestoreFields, key: string): string | null {
 
 function readNumber(fields: FirestoreFields, key: string): number {
   const value = fields[key];
-  if (!value || !("integerValue" in value)) return 0;
+  if (!value) return 0;
+  if ("doubleValue" in value) {
+    const parsed = Number(value.doubleValue);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  if (!("integerValue" in value)) return 0;
   const parsed = Number(value.integerValue);
   return Number.isFinite(parsed) ? parsed : 0;
 }
