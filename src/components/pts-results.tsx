@@ -4,7 +4,7 @@ import { InactiveClaimButton } from "@/components/inactive-claim-button";
 import { PointsChart } from "@/components/points-chart";
 import { ReferralPanel } from "@/components/referral-panel";
 import { RefreshButton } from "@/components/refresh-button";
-import { UsdcAmount, UsdcInline } from "@/components/usdc-amount";
+import { ReferralUsdc, UsdcAmount, UsdcInline } from "@/components/usdc-amount";
 import { Badge } from "@/components/ui/badge";
 import { qualification } from "@/lib/eligibility";
 import { profileNotice } from "@/lib/notices";
@@ -78,7 +78,7 @@ export function PtsResults({
     cached: "Showing a saved snapshot. This page did not call Pump.fun again.",
     stale: "This snapshot is older than the cache window. Refresh to request a newer read.",
     demo: "These figures are sample data, not live Pump.fun statistics.",
-    empty: "No points snapshot is stored for this account yet.",
+    empty: "No USDC snapshot is stored for this account yet.",
   }[freshness];
   const rows = snapshot
     ? [
@@ -113,7 +113,7 @@ export function PtsResults({
         <RefreshButton profileKey={publicProfileKey(user)} />
       </div>
 
-      {note ? <p className="rounded-none border border-blue/30 bg-blue/10 px-4 py-3 text-sm text-mist">{note}</p> : null}
+      {note ? <p className="rounded-none border border-blue/30 bg-blue/10 px-4 py-3 text-sm text-mist"><UsdcInline text={note} /></p> : null}
       <p className="text-sm text-mute">{freshnessCopy}</p>
 
       <section className="grid gap-3 lg:grid-cols-[0.9fr_1.1fr]">
@@ -123,7 +123,10 @@ export function PtsResults({
             <UsdcAmount points={user.currentPoints} markClassName="h-6 w-6" />
           </p>
           {referralPoints > 0 ? (
-            <p className="mt-3 text-sm text-mute"><UsdcInline text={`${formatNumber(referralPoints)} referral PTS stay separate from this USDC total.`} /></p>
+            <p className="mt-3 text-sm text-mute">
+              <ReferralUsdc sharePoints={referralPoints} />
+              <UsdcInline text=" from referrals stays separate from this USDC total." />
+            </p>
           ) : null}
           <div className="mt-4">
             {status.status === "unavailable" ? (
@@ -132,30 +135,30 @@ export function PtsResults({
             {status.status === "not_eligible" ? (
               <div className="space-y-2">
                 <Badge tone="unavailable">Not Eligible</Badge>
-                <p className="break-words text-sm text-mute">{status.reason}</p>
+                <p className="break-words text-sm text-mute"><UsdcInline text={status.reason} /></p>
               </div>
             ) : null}
             {status.status === "claim_coming_soon" ? (
               <div className="space-y-2">
                 <Badge tone="cached">Claim coming soon</Badge>
-                <p className="break-words text-sm text-mute">{status.detail}</p>
+                <p className="break-words text-sm text-mute"><UsdcInline text={status.detail} /></p>
               </div>
             ) : null}
             {status.status === "eligible" ? (
               <div className="space-y-2">
                 <Badge tone="live">Eligible</Badge>
-                <p className="break-words text-sm text-mute">{status.detail}</p>
+                <p className="break-words text-sm text-mute"><UsdcInline text={status.detail} /></p>
               </div>
             ) : null}
           </div>
-          <p className="mt-4 text-sm text-mute">Current points requirement: {campaign.minPoints.toLocaleString("en-US")} PTS.</p>
+          <p className="mt-4 text-sm text-mute">Current <UsdcInline text="USDC" /> requirement: <UsdcAmount points={campaign.minPoints} markClassName="h-3.5 w-3.5" />.</p>
           {user.flagged && user.flagReason ? <p className="mt-2 text-sm text-warn">{user.flagReason}</p> : null}
           <InactiveClaimButton className="mt-5" />
         </article>
         <article className="min-w-0 border border-line bg-panel p-4 sm:p-5">
           <h2 className="font-display text-xl"><UsdcInline text="USDC breakdown" /></h2>
           <div className="mt-4">
-            {snapshot ? <PointsChart components={snapshot.pointsBreakdown.components} /> : <p className="text-sm text-mute">No points data is currently available for this account.</p>}
+            {snapshot ? <PointsChart components={snapshot.pointsBreakdown.components} /> : <p className="text-sm text-mute"><UsdcInline text="No USDC data is currently available for this account." /></p>}
           </div>
         </article>
       </section>

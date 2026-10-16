@@ -47,7 +47,7 @@ export default async function ProfilePage({
       return (
         <div className="space-y-3">
           <h1 className="font-display text-4xl">Points unavailable</h1>
-          <p className="text-mute">Unable to retrieve your points right now. Please try again.</p>
+          <p className="text-mute">Unable to retrieve your USDC right now. Please try again.</p>
           <Link className="text-blue" href="/#check">
             Check Another Account
           </Link>

@@ -1,3 +1,5 @@
+import { formatUsdc } from "@/server/points/calculate";
+
 export type Qualification =
   | { status: "unavailable" }
   | { status: "not_eligible"; reason: string }
@@ -28,17 +30,17 @@ export function qualification(input: {
   if (input.points < input.minPoints) {
     return {
       status: "not_eligible",
-      reason: `This account has ${input.points.toLocaleString("en-US")} PTS. The current requirement is ${input.minPoints.toLocaleString("en-US")} PTS.`,
+      reason: `This account has $${formatUsdc(input.points)} USDC. The current requirement is $${formatUsdc(input.minPoints)} USDC.`,
     };
   }
   if (input.claimStatus !== "claim_open") {
     return {
       status: "claim_coming_soon",
-      detail: "This account meets the current points requirement. Claiming is not open yet.",
+      detail: "This account meets the current USDC requirement. Claiming is not open yet.",
     };
   }
   return {
     status: "eligible",
-    detail: "This account meets the current points requirement, and claiming is open.",
+    detail: "This account meets the current USDC requirement, and claiming is open.",
   };
 }

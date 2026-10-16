@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import type { CampaignRecord, ClaimRecord, FailureRecord, UserRecord } from "@/server/db/types";
 import type { ScoringSettings } from "@/server/points/calculate";
 import { formatNumber, formatWhen } from "@/lib/utils";
+import { UsdcAmount } from "@/components/usdc-amount";
 
 export interface AdminData {
   settings: ScoringSettings;
@@ -268,7 +269,7 @@ export function AdminDashboard({ data }: { data: AdminData }) {
         <ul className="mt-3 space-y-2 text-sm">
           {data.claims.map((claim) => (
             <li key={claim.id}>
-              {claim.status} · {claim.wallet} · {formatNumber(claim.pointsAtClaim)} pts
+              {claim.status} · {claim.wallet} · <UsdcAmount points={claim.pointsAtClaim} markClassName="h-3.5 w-3.5" />
               {claim.failureReason ? ` · ${claim.failureReason}` : ""}
               {claim.txSignature ? ` · ${claim.txSignature}` : ""}
             </li>

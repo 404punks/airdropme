@@ -7,9 +7,9 @@ const faqs = [
   ["Why are some numbers unavailable?", "Pump.fun does not publish every field without authentication. Unavailable fields are not scored and are not treated as zero."],
   ["Do likes and reposts come from a live total?", "Callouts created come from the public all-time total. Likes and reposts are sums of the public Callout list, with duplicate Callouts removed. An incomplete page walk is not scored."],
   ["What about retweets?", "The public Callout data includes reposts, not a separate retweet count. Retweets stay unavailable."],
-  ["Does refreshing add PTS again?", "No. The score is replaced using the current cumulative totals."],
+  ["Does refreshing add USDC again?", "No. The USDC total is replaced using the current cumulative totals."],
   ["Does a claim send tokens?", "Not right now. Claiming is not open, and no token distribution is configured. A future claim signature would register a request. It would not send tokens unless a funded distributor is added."],
-  ["How do referrals work?", "After your Pump.fun profile and wallet address are connected, your referral link is https://www.calloutdrop.app/r/ plus your username. When someone joins from that link, you receive 1% of their reward. The referral link and history are stored with the Firebase API and are not deleted. Refreshing the page, or disconnecting and connecting the wallet again, keeps the same referral link."],
+  ["How do referrals work?", "After your Pump.fun profile and wallet address are connected, your referral link is https://www.calloutdrop.app/r/ plus your username. When someone joins from that link, you receive 1% of their USDC. The referral link and history are stored with the Firebase API and are not deleted. Refreshing the page, or disconnecting and connecting the wallet again, keeps the same referral link."],
 ];
 
 export default async function HowItWorksPage() {
@@ -47,8 +47,8 @@ export default async function HowItWorksPage() {
         <h2 className="font-display text-2xl">Questions</h2>
         {faqs.map(([question, answer]) => (
           <details key={question} className="rounded-none border border-line bg-panel p-4">
-            <summary className="cursor-pointer font-medium">{question}</summary>
-            <p className="mt-2 text-sm leading-6 text-mute">{answer}</p>
+            <summary className="cursor-pointer font-medium"><UsdcInline text={question} /></summary>
+            <p className="mt-2 text-sm leading-6 text-mute"><UsdcInline text={answer} /></p>
           </details>
         ))}
       </section>

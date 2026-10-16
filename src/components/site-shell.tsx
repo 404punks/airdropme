@@ -40,9 +40,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         <main className="flex-1">{children}</main>
         <footer className="mt-10 space-y-3 border-t border-line pt-5 text-xs leading-5 text-mute sm:text-sm">
           <p>
-            PTS are calculated from public Pump.fun statistics. They are not a promise of tokens, price, or a completed
-            airdrop. Checking connects a Solana wallet and reads only the public address. A signature is requested only
-            when claiming is open.
+            <UsdcInline text="USDC is calculated from public Pump.fun statistics. It is not a promise of tokens, price, or a completed airdrop. Checking connects a Solana wallet and reads only the public address. A signature is requested only when claiming is open." />
           </p>
           {store.kind === "memory" ? (
             <p>This server is not using a shared database. Profile checks still use public Pump.fun data.</p>

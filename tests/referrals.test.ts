@@ -192,10 +192,10 @@ describe("referral rules", () => {
     expect(profileNotice("Profile registered from public Pump.fun data.")).toBeNull();
     expect(
       profileNotice(
-        "Profile registered from public Pump.fun data. You joined from a referral link. Your referrer receives 1.82 PTS, 1% of your reward. This referral is stored in Firebase and is not deleted.",
+        "Profile registered from public Pump.fun data. You joined from a referral link. Your referrer receives $0.0182 USDC, 1% of your USDC. This referral is stored in Firebase and is not deleted.",
       ),
     ).toBe(
-      "You joined from a referral link. Your referrer receives 1.82 PTS, 1% of your reward. This referral is stored in Firebase and is not deleted.",
+      "You joined from a referral link. Your referrer receives $0.0182 USDC, 1% of your USDC. This referral is stored in Firebase and is not deleted.",
     );
   });
 

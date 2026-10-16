@@ -10,7 +10,7 @@ import { createSolanaWallets } from "@/components/wallet-adapters";
 import type { SavedReferral } from "@/lib/saved-referral";
 
 const MISSING = "We couldn't find this profile. Please check the username and try again.";
-const UNAVAILABLE = "Unable to retrieve your points right now. Please try again.";
+const UNAVAILABLE = "Unable to retrieve your USDC right now. Please try again.";
 
 export function WalletCheck({
   rpcUrl,

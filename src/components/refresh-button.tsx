@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { UsdcInline } from "@/components/usdc-amount";
 
 export function RefreshButton({ profileKey }: { profileKey: string }) {
   const router = useRouter();
@@ -32,7 +33,7 @@ export function RefreshButton({ profileKey }: { profileKey: string }) {
   return (
     <div className="w-full space-y-2 sm:w-auto">
       <Button type="button" variant="outline" onClick={refresh} disabled={pending} className="w-full sm:w-auto">
-        {pending ? "Refreshing…" : "Refresh points"}
+        {pending ? "Refreshing…" : <UsdcInline text="Refresh USDC" />}
       </Button>
       {error ? <p className="text-sm text-danger">{error}</p> : null}
     </div>

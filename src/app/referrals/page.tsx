@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { CopyLink } from "@/components/copy-link";
+import { ReferralUsdc, UsdcInline } from "@/components/usdc-amount";
 import { getReferralRepository, loadReferralState, referralRewardPoints } from "@/server/referrals/service";
 import { DEFAULT_SITE_ORIGIN, presentReferralHistory, referralLeaderboard } from "@/server/referrals/logic";
-import { formatNumber } from "@/lib/utils";
 
 function safeImage(url: string | null): string | null {
   if (!url) return null;
@@ -38,7 +38,7 @@ export default async function ReferralsPage() {
         <p className="text-xs font-medium text-blue">Callout Drop</p>
         <h1 className="mt-2 font-display text-3xl font-semibold sm:text-4xl">Top 100 referrers</h1>
         <p className="mt-4 max-w-2xl text-mute">
-          A referral link is created from your Pump.fun username after your profile and wallet address are connected. It uses {DEFAULT_SITE_ORIGIN}. When someone joins from that link, you receive 1% of their reward.
+          <UsdcInline text={`A referral link is created from your Pump.fun username after your profile and wallet address are connected. It uses ${DEFAULT_SITE_ORIGIN}. When someone joins from that link, you receive 1% of their USDC.`} />
         </p>
       </section>
 
@@ -70,7 +70,7 @@ export default async function ReferralsPage() {
                   {row.username}
                 </Link>
                 <p className="mt-1 text-sm text-mist">
-                  {row.referrals} referrals · {formatNumber(row.points)} PTS
+                  {row.referrals} referrals · <ReferralUsdc sharePoints={row.points} />
                 </p>
                 <div className="mt-2 flex items-center gap-2">
                   <p className="min-w-0 flex-1 break-all text-xs text-blue">{row.link}</p>
@@ -101,7 +101,7 @@ export default async function ReferralsPage() {
                   <CopyLink link={row.referralLink} compact />
                 </div>
                 <p className="mt-1 text-mute">
-                  {row.domain} · {formatNumber(row.referrerPoints)} PTS to the referrer, 1% of their reward
+                  {row.domain} · <ReferralUsdc sharePoints={row.referrerPoints} /> to the referrer, 1% of their <UsdcInline text="USDC" />
                 </p>
               </li>
             ))}

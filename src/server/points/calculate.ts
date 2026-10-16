@@ -140,6 +140,10 @@ export function formatUsdc(points: number): string {
   return usdcFromPoints(points).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+export function formatReferralUsdc(sharePoints: number): string {
+  return usdcFromPoints(sharePoints).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+}
+
 export function explainFormula(settings: ScoringSettings): string[] {
   return [
     `$${formatUsdc(settings.pointsPerFollower)} USDC per verified follower`,

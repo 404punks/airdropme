@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { CopyLink } from "@/components/copy-link";
+import { UsdcInline } from "@/components/usdc-amount";
 import {
   completeReferralSteps,
   emptyReferralBook,
@@ -113,7 +114,7 @@ export function CheckForm({
       )}
       {invitedBy ? (
         <p className="border border-blue/30 bg-blue/10 px-4 py-3 text-sm text-mist">
-          {invitedBy} invited you. They receive 1% of this account&apos;s reward.
+          {invitedBy} invited you. They receive 1% of this account&apos;s <UsdcInline text="USDC" />.
         </p>
       ) : null}
     </div>
