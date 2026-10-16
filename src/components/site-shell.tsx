@@ -55,6 +55,9 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             <Link className="hover:text-white" href="/data-sources">
               Data sources
             </Link>
+            <a className="hover:text-white" href="https://x.com/calloutdrop" target="_blank" rel="noreferrer">
+              X
+            </a>
           </p>
         </footer>
       </div>
