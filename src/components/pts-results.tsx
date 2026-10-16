@@ -123,7 +123,7 @@ export function PtsResults({
             <UsdcAmount points={user.currentPoints} markClassName="h-6 w-6" />
           </p>
           {referralPoints > 0 ? (
-            <p className="mt-3 text-sm text-mute">{formatNumber(referralPoints)} referral PTS stay separate from this USDC total.</p>
+            <p className="mt-3 text-sm text-mute"><UsdcInline text={`${formatNumber(referralPoints)} referral PTS stay separate from this USDC total.`} /></p>
           ) : null}
           <div className="mt-4">
             {status.status === "unavailable" ? (
