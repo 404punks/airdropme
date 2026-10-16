@@ -12,6 +12,8 @@ const schema = z.object({
   IP_HASH_SALT: z.string().default("dev-only-ip-salt"),
   DISTRIBUTION_ENABLED: z.enum(["true", "false"]).default("false"),
   SOLANA_RPC_URL: z.string().default("https://api.mainnet-beta.solana.com"),
+  WALLETCONNECT_PROJECT_ID: z.string().default(""),
+  NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: z.string().default(""),
   STATS_CACHE_TTL_SECONDS: z.coerce.number().int().positive().default(600),
   MIN_REFRESH_SECONDS: z.coerce.number().int().nonnegative().default(60),
   SUBMISSIONS_PER_WINDOW: z.coerce.number().int().positive().default(8),
@@ -34,6 +36,7 @@ export type AppConfig = z.infer<typeof schema> & {
   adminEnabled: boolean;
   firebase: FirebaseConfig | null;
   firebaseConnected: boolean;
+  walletConnectProjectId: string;
 };
 
 const DATABASE_ENV_KEYS = [
@@ -74,6 +77,7 @@ export function readConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     adminEnabled,
     firebase,
     firebaseConnected: firebase != null,
+    walletConnectProjectId: (parsed.WALLETCONNECT_PROJECT_ID || parsed.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID).trim(),
   };
 }
 

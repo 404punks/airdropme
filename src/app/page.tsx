@@ -21,14 +21,14 @@ export default async function HomePage() {
           Follow on X, then connect a Solana wallet. The check uses that address.
         </p>
         <div className="mt-5">
-          <CheckForm invitedBy={invitedBy} rpcUrl={config.SOLANA_RPC_URL} />
+          <CheckForm invitedBy={invitedBy} rpcUrl={config.SOLANA_RPC_URL} projectId={config.walletConnectProjectId} />
         </div>
       </section>
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {[
           ["Follow", "Follow Callout Drop on X, then like and repost. Both buttons open the next step."],
-          ["Connect", "Connect a Solana wallet. Checking uses that public address and does not ask for a signature."],
+          ["Connect", "Connect with WalletConnect, Phantom, or Solflare. Chrome and wallet apps can connect. Checking uses the public address and does not ask for a seed phrase."],
           ["Claim later", "Claiming is not open yet. The claim button stays inactive."],
         ].map(([title, copy]) => (
           <article key={title} className="flex aspect-square flex-col justify-between border border-line bg-navy p-4 sm:aspect-auto sm:min-h-40">

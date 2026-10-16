@@ -7,6 +7,14 @@ const ClaimFlow = dynamic(() => import("@/components/claim-flow").then((mod) => 
   loading: () => <p className="text-sm text-mute">Loading wallet connection…</p>,
 });
 
-export function ClaimClient({ rpcUrl, distributionEnabled }: { rpcUrl: string; distributionEnabled: boolean }) {
-  return <ClaimFlow rpcUrl={rpcUrl} distributionEnabled={distributionEnabled} />;
+export function ClaimClient({
+  rpcUrl,
+  distributionEnabled,
+  projectId = "",
+}: {
+  rpcUrl: string;
+  distributionEnabled: boolean;
+  projectId?: string;
+}) {
+  return <ClaimFlow rpcUrl={rpcUrl} distributionEnabled={distributionEnabled} projectId={projectId} />;
 }

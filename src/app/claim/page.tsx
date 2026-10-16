@@ -5,7 +5,7 @@ import { getStore } from "@/server/db";
 
 const steps = [
   ["Step 1 — Check Your Eligibility", "Enter your Pump.fun username or wallet address to check your PTS and review your eligibility status."],
-  ["Step 2 — Connect Your Wallet", "Connect a supported Solana wallet to verify the wallet address associated with your claim. Make sure you select the correct wallet."],
+  ["Step 2 — Connect Your Wallet", "Connect with WalletConnect, Phantom, or Solflare. Chrome and wallet apps can connect. This connection does not ask for a seed phrase. Make sure you select the correct wallet."],
   ["Step 3 — Review Your Claim", "If you are eligible and claiming is open, review the available claim details, including the token, amount, and destination wallet, before continuing."],
   ["Step 4 — Confirm Your Claim", "Approve the transaction in your wallet only after reviewing the transaction details. Never share your recovery phrase or private keys."],
   ["Step 5 — Check Your Claim Status", "Once the transaction is processed, check the claim status and transaction details. Processing times may vary depending on network conditions."],
@@ -57,7 +57,7 @@ export default async function ClaimPage() {
         </p>
         {claimOpen ? (
           <div className="mt-5">
-            <ClaimClient rpcUrl={config.SOLANA_RPC_URL} distributionEnabled={config.distributionEnabled} />
+            <ClaimClient rpcUrl={config.SOLANA_RPC_URL} distributionEnabled={config.distributionEnabled} projectId={config.walletConnectProjectId} />
           </div>
         ) : (
           <p className="mt-5 text-sm text-mist">Claim coming soon. You can check PTS without connecting a wallet.</p>

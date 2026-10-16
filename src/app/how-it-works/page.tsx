@@ -3,13 +3,13 @@ import { explainFormula } from "@/server/points/calculate";
 import { getStore } from "@/server/db";
 
 const faqs = [
-  ["Do I need a wallet to check?", "Yes. Follow Callout Drop on X and open the like and repost step, then connect a Solana wallet. Checking uses that public address and does not ask for a signature. A signature is used only on the claim page, and only when claiming is open."],
+  ["Do I need a wallet to check?", "Yes. Follow Callout Drop on X and open the like and repost step, then connect a Solana wallet with WalletConnect, Phantom, or Solflare. Chrome and wallet apps can connect. Checking uses that public address and does not ask for a seed phrase or a signature. A signature is used only on the claim page, and only when claiming is open."],
   ["Why are some numbers unavailable?", "Pump.fun does not publish every field without authentication. Unavailable fields are not scored and are not treated as zero."],
   ["Do likes and reposts come from a live total?", "Callouts created come from the public all-time total. Likes and reposts are sums of the public Callout list, with duplicate Callouts removed. An incomplete page walk is not scored."],
   ["What about retweets?", "The public Callout data includes reposts, not a separate retweet count. Retweets stay unavailable."],
   ["Does refreshing add PTS again?", "No. The score is replaced using the current cumulative totals."],
   ["Does a claim send tokens?", "Not right now. Claiming is not open, and no token distribution is configured. A future claim signature would register a request. It would not send tokens unless a funded distributor is added."],
-  ["How do referrals work?", "After your Pump.fun profile and wallet address are connected, your referral link is https://www.calloutdrop.app/r/ plus your username. When a new account joins from that link, you receive 170 PTS and they receive 170 PTS. The referral link and history are stored with the Firebase API and are not deleted."],
+  ["How do referrals work?", "After your Pump.fun profile and wallet address are connected, your referral link is https://www.calloutdrop.app/r/ plus your username. When a new account joins from that link, you receive 170 PTS and they receive 170 PTS. The referral link and history are stored with the Firebase API and are not deleted. Refreshing the page, or disconnecting and connecting the wallet again, keeps the same referral link."],
 ];
 
 export default async function HowItWorksPage() {
@@ -25,7 +25,7 @@ export default async function HowItWorksPage() {
       </div>
       <ol className="grid gap-4 md:grid-cols-3">
         {[
-          ["1. Follow and connect", "Follow Callout Drop on X, like and repost, then connect a Solana wallet. The check uses that public address."],
+          ["1. Follow and connect", "Follow Callout Drop on X, like and repost, then connect a Solana wallet with WalletConnect, Phantom, or Solflare. The check uses that public address."],
           ["2. Review public data", "The server requests the profile, follower count, and Callout statistics from fixed Pump.fun paths."],
           ["3. See your USDC", "Each verified total is scored at the USDC rate. A refresh replaces the previous total."],
         ].map(([title, copy]) => (

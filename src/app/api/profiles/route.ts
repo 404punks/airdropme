@@ -5,7 +5,7 @@ import { clientIp } from "@/server/security/ip";
 import { getProvider } from "@/server/pumpfun";
 import { referrerFromCookieHeader } from "@/server/referrals/cookie";
 import { originFromHeaders } from "@/server/referrals/logic";
-import { publicProfileKey, submitProfile } from "@/server/services/profiles";
+import { profileReferralLink, publicProfileKey, submitProfile } from "@/server/services/profiles";
 
 export async function POST(request: Request) {
   try {
@@ -26,6 +26,12 @@ export async function POST(request: Request) {
       message: view.message,
       points: view.user.currentPoints,
       dataMode: view.user.dataMode,
+      username: view.user.username,
+      wallet: view.user.canonicalWallet,
+      referralLink:
+        view.user.username && view.user.canonicalWallet
+          ? profileReferralLink(view.user.username, originFromHeaders(request.headers))
+          : null,
     });
   } catch (error) {
     return errorResponse(error);

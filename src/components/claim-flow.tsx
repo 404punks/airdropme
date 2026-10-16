@@ -3,8 +3,7 @@
 import { useMemo, useState } from "react";
 import { ConnectionProvider, WalletProvider, useWallet } from "@solana/wallet-adapter-react";
 import { WalletModalProvider, WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { PhantomWalletAdapter } from "@solana/wallet-adapter-phantom";
-import { SolflareWalletAdapter } from "@solana/wallet-adapter-solflare";
+import { createSolanaWallets } from "@/components/wallet-adapters";
 import bs58 from "bs58";
 import "@solana/wallet-adapter-react-ui/styles.css";
 import { CopyAddress } from "@/components/copy-address";
@@ -166,8 +165,16 @@ function ClaimInner({ rpcUrl, distributionEnabled }: { rpcUrl: string; distribut
   );
 }
 
-export function ClaimFlow({ rpcUrl, distributionEnabled }: { rpcUrl: string; distributionEnabled: boolean }) {
-  const wallets = useMemo(() => [new PhantomWalletAdapter(), new SolflareWalletAdapter()], []);
+export function ClaimFlow({
+  rpcUrl,
+  distributionEnabled,
+  projectId = "",
+}: {
+  rpcUrl: string;
+  distributionEnabled: boolean;
+  projectId?: string;
+}) {
+  const wallets = useMemo(() => createSolanaWallets(rpcUrl, projectId), [rpcUrl, projectId]);
   return (
     <ConnectionProvider endpoint={rpcUrl}>
       <WalletProvider wallets={wallets} autoConnect>

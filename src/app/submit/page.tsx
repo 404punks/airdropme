@@ -8,7 +8,7 @@ export default function SubmitPage() {
       <h1 className="font-display text-3xl font-semibold sm:text-4xl"><UsdcInline text="Check Your USDC" /></h1>
       <p className="mt-4 text-mute">Follow on X, then connect a Solana wallet. The check uses that address.</p>
       <div className="mt-8">
-        <CheckForm rpcUrl={config.SOLANA_RPC_URL} />
+        <CheckForm rpcUrl={config.SOLANA_RPC_URL} projectId={config.walletConnectProjectId} />
       </div>
     </section>
   );
