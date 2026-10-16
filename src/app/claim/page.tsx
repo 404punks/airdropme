@@ -1,15 +1,16 @@
 import { ClaimClient } from "@/components/claim-client";
+import { ClaimReward } from "@/components/claim-reward";
 import { InactiveClaimButton } from "@/components/inactive-claim-button";
 import { UsdcAmount, UsdcInline } from "@/components/usdc-amount";
 import { config } from "@/server/config";
 import { getStore } from "@/server/db";
 
 const steps = [
-  ["Step 1 — Check Your Eligibility", "Enter your Pump.fun username or wallet address to check your USDC and review your eligibility status."],
-  ["Step 2 — Connect Your Wallet", "Connect with WalletConnect, Phantom, or Solflare. Chrome and wallet apps can connect. This connection does not ask for a seed phrase. Make sure you select the correct wallet."],
-  ["Step 3 — Review Your Claim", "If you are eligible and claiming is open, review the available claim details, including the token, amount, and destination wallet, before continuing."],
-  ["Step 4 — Confirm Your Claim", "Approve the transaction in your wallet only after reviewing the transaction details. Never share your recovery phrase or private keys."],
-  ["Step 5 — Check Your Claim Status", "Once the transaction is processed, check the claim status and transaction details. Processing times may vary depending on network conditions."],
+  ["Check Your Eligibility", "Enter your Pump.fun username or wallet address to check your USDC and review your eligibility status."],
+  ["Connect Your Wallet", "Connect with WalletConnect, Phantom, or Solflare. Chrome and wallet apps can connect. This connection does not ask for a seed phrase. Make sure you select the correct wallet."],
+  ["Review Your Claim", "If you are eligible and claiming is open, review the available claim details, including the token, amount, and destination wallet, before continuing."],
+  ["Confirm Your Claim", "Approve the transaction in your wallet only after reviewing the transaction details. Never share your recovery phrase or private keys."],
+  ["Check Your Claim Status", "Once the transaction is processed, check the claim status and transaction details. Processing times may vary depending on network conditions."],
 ];
 
 export default async function ClaimPage() {
@@ -29,10 +30,11 @@ export default async function ClaimPage() {
           Check your eligibility, connect your Solana wallet, and follow the instructions to claim your rewards when
           claiming is available.
         </p>
+        <ClaimReward />
         <InactiveClaimButton className="mt-6" />
       </section>
 
-      <ol className="space-y-3">
+      <ol className="list-none space-y-3">
         {steps.map(([title, copy]) => (
           <li key={title} className="rounded-none border border-line bg-navy p-5">
             <h2 className="font-display text-lg">{title}</h2>

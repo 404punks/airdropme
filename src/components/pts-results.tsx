@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CopyAddress } from "@/components/copy-address";
 import { InactiveClaimButton } from "@/components/inactive-claim-button";
+import { LogoutButton } from "@/components/logout-button";
 import { PointsChart } from "@/components/points-chart";
 import { ReferralPanel } from "@/components/referral-panel";
 import { RefreshButton } from "@/components/refresh-button";
@@ -110,7 +111,10 @@ export function PtsResults({
             <p className="mt-1 text-sm text-mute">Updated {formatWhen(snapshot?.fetchedAt ?? user.lastFetchedAt)}</p>
           </div>
         </div>
-        <RefreshButton profileKey={publicProfileKey(user)} />
+        <div className="flex w-full flex-col gap-2 sm:w-auto">
+          <RefreshButton profileKey={publicProfileKey(user)} />
+          <LogoutButton redirectTo="/" />
+        </div>
       </div>
 
       {note ? <p className="rounded-none border border-blue/30 bg-blue/10 px-4 py-3 text-sm text-mist"><UsdcInline text={note} /></p> : null}

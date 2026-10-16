@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { CopyLink } from "@/components/copy-link";
+import { LOGOUT_EVENT, LogoutButton } from "@/components/logout-button";
 import { UsdcInline } from "@/components/usdc-amount";
 import {
   completeReferralSteps,
@@ -55,6 +56,21 @@ export function CheckForm({
       setShared(true);
       setReady(true);
     }
+  }, []);
+
+  useEffect(() => {
+    function onLogout() {
+      const stored = loadReferralBook(window.localStorage);
+      bookRef.current = stored;
+      setBook(stored);
+      followedRef.current = false;
+      sharedRef.current = false;
+      setFollowed(false);
+      setShared(false);
+      setReady(false);
+    }
+    window.addEventListener(LOGOUT_EVENT, onLogout);
+    return () => window.removeEventListener(LOGOUT_EVENT, onLogout);
   }, []);
 
   function finishStep(kind: "follow" | "share") {
@@ -117,6 +133,7 @@ export function CheckForm({
           {invitedBy} invited you. They receive 1% of this account&apos;s <UsdcInline text="USDC" />.
         </p>
       ) : null}
+      <LogoutButton />
     </div>
   );
 }
